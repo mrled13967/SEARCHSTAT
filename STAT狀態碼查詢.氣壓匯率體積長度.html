@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRL Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* ===== TSMC-INSPIRED DARK TECH THEME ===== */
+        :root {
+            --tsmc-red: #c82333;
+            --tsmc-red-light: #ff4d5e;
+            --tsmc-red-dark: #9b1b2a;
+            --tsmc-red-glow: rgba(255, 77, 94, 0.35);
+            --triggered-bg: rgba(255, 60, 60, 0.15);
+            --triggered-border: rgba(255, 77, 94, 0.5);
+            --triggered-text: #ff6b7a;
+            --status-true: #ff4d5e;
+            --status-false: #4ade80;
+            --status-na: #9aa0a6;
+            --bg-primary: #080c16;
+            --bg-secondary: #0f1729;
+            --bg-card: rgba(16, 24, 48, 0.7);
+            --bg-card-hover: rgba(24, 36, 64, 0.8);
+            --bg-input: rgba(0, 0, 0, 0.4);
+            --text-primary: #f0f2f5;
+            --text-secondary: #b0b8c4;
+            --text-muted: #6b7280;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-glow: rgba(255, 77, 94, 0.4);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255,255,255,0.05);
+            --transition: 0.25s ease;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #0d1525 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* --- Tab Navigation --- */
+        .tab-nav {
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab-nav button {
+            background: transparent;
+            border: none;
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: color var(--transition), border-bottom-color var(--transition), text-shadow var(--transition);
+            letter-spacing: 0.5px;
+        }
+
+        .tab-nav button:hover {
+            color: var(--tsmc-red-light);
+            text-shadow: 0 0 12px var(--tsmc-red-glow);
+        }
+
+        .tab-nav button.active {
+            color: var(--tsmc-red-light);
+            border-bottom-color: var(--tsmc-red);
+            text-shadow: 0 0 16px var(--tsmc-red-glow);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Decoder Page --- */
+        #decoder-page .master-container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        #decoder-page h1.main-title {
+            text-align: center;
+            background: linear-gradient(135deg, var(--tsmc-red-light), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 32px;
+            font-weight: 700;
+            font-size: 2.5em;
+            text-shadow: none;
+        }
+
+        #decoder-page .quick-input-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            padding: 28px 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        #decoder-page .decoders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 28px;
+        }
+
+        #decoder-page .decoder-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            padding: 28px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #decoder-page .decoder-section.hidden { display: none; }
+
+        #decoder-page .decoder-section:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-glow);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--tsmc-red-glow);
+        }
+
+        #decoder-page .decoder-section h2 {
+            color: var(--tsmc-red-light);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        #decoder-page .triggered-bits-container {
+            background: rgba(255, 40, 40, 0.08);
+            border: 2px solid var(--triggered-border);
+            border-left: 4px solid var(--status-true);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            min-height: 100px;
+            flex-grow: 1;
+            box-shadow: inset 0 0 20px rgba(255, 60, 60, 0.05);
+        }
+
+        #decoder-page .triggered-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 77, 94, 0.2);
+        }
+
+        #decoder-page .triggered-bits-container h3 {
+            margin: 0;
+            color: var(--status-true);
+            font-size: 1.1em;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 77, 94, 0.3);
+        }
+
+        #decoder-page .download-btn {
+            background: linear-gradient(135deg, var(--tsmc-red), var(--tsmc-red-dark));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: box-shadow var(--transition), transform var(--transition);
+            letter-spacing: 0.3px;
+        }
+
+        #decoder-page .download-btn:hover {
+            box-shadow: 0 0 14px var(--tsmc-red-glow);
+            transform: translateY(-1px);
+        }
+
+        #decoder-page .download-btn.hidden { display: none; }
+
+        #decoder-page .triggered-bits-list p {
+            text-align: left;
+            margin: 6px 0;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 0.92em;
+            background: rgba(255, 60, 60, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid var(--status-true);
+        }
+
+        #decoder-page .triggered-bits-list p b {
+            color: var(--status-true);
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(255, 77, 94, 0.3);
+        }
+
+        #decoder-page .input-area { margin-bottom: 20px; }
+
+        #decoder-page .input-area label {
+            font-weight: 600;
+            color: var(--tsmc-red-light);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #decoder-page .input-area input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 1.1em;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        #decoder-page .input-area input::placeholder { color: var(--text-muted); }
+
+        #decoder-page .input-area input:focus {
+            outline: none;
+            border-color: var(--tsmc-red);
+            box-shadow: 0 0 0 3px var(--tsmc-red-glow), 0 0 12px rgba(200, 35, 51, 0.15);
+        }
+
+        #decoder-page .binary-output-container p {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        #decoder-page .binary-output {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            word-break: break-all;
+            border: 1px solid rgba(255, 77, 94, 0.2);
+            letter-spacing: 2px;
+        }
+
+        #decoder-page table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        #decoder-page th, #decoder-page td {
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        #decoder-page th {
+            background: rgba(255, 77, 94, 0.18);
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.82em;
+        }
+
+        #decoder-page th.desc-col, #decoder-page td.desc-col { font-size: 0.95em; }
+
+        #decoder-page tr:nth-child(even) { background: rgba(255, 255, 255, 0.025); }
+        #decoder-page tr:nth-child(odd) { background: rgba(0, 0, 0, 0.15); }
+
+        /* === TRIGGERED ROW — HIGH CONTRAST === */
+        #decoder-page tr.true, #decoder-page tr.high {
+            background: rgba(255, 50, 50, 0.2) !important;
+            border-left: 4px solid var(--status-true);
+        }
+
+        #decoder-page tr.true td, #decoder-page tr.high td {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        #decoder-page tr.true td:first-child, #decoder-page tr.high td:first-child {
+            color: var(--status-true);
+            font-weight: 700;
+        }
+
+        #decoder-page tr.true td:nth-child(3), #decoder-page tr.high td:nth-child(3) {
+            color: var(--status-true);
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(255, 77, 94, 0.4);
+            font-size: 0.95em;
+        }
+
+        #decoder-page .bit-col { width: 8%; text-align: center; }
+        #decoder-page .desc-col { width: 72%; }
+        #decoder-page .result-col { width: 20%; text-align: center; }
+
+        #decoder-page .chinese-desc {
+            color: var(--text-secondary);
+            font-size: 0.88em;
+            display: block;
+            margin-top: 3px;
+        }
+
+        /* --- Converter Page --- */
+        #converter-page {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #converter-page .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+        }
+
+        #converter-page .nav {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            background: rgba(200, 35, 51, 0.08);
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(200, 35, 51, 0.12);
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        #converter-page .nav a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background-color var(--transition), color var(--transition), box-shadow var(--transition);
+            font-size: 0.9em;
+        }
+
+        #converter-page .nav a:hover {
+            color: var(--tsmc-red-light);
+            background: rgba(200, 35, 51, 0.12);
+        }
+
+        #converter-page .nav a.active {
+            background: linear-gradient(135deg, var(--tsmc-red), var(--tsmc-red-dark));
+            color: white;
+            box-shadow: 0 0 12px var(--tsmc-red-glow);
+        }
+
+        #converter-page .collapsible {
+            background: linear-gradient(135deg, var(--tsmc-red), var(--tsmc-red-dark));
+            color: white;
+            cursor: pointer;
+            padding: 16px 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            margin-top: 1rem;
+            transition: box-shadow var(--transition);
+            letter-spacing: 0.3px;
+        }
+
+        #converter-page .collapsible:hover {
+            box-shadow: 0 0 16px var(--tsmc-red-glow);
+        }
+
+        #converter-page .collapsible:after {
+            content: '\2796';
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            float: right;
+            margin-left: 5px;
+        }
+
+        #converter-page .collapsible.active:after {
+            content: "\2795";
+        }
+
+        #converter-page .content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 6px 6px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+
+        #converter-page .converter-container {
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        #converter-page h1 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        #converter-page .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        #converter-page .input-group input {
+            flex: 3;
+            padding: 0.55rem 0.7rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        #converter-page .input-group input::placeholder { color: var(--text-muted); }
+
+        #converter-page .input-group input:focus {
+            outline: none;
+            border-color: var(--tsmc-red);
+            box-shadow: 0 0 0 2px var(--tsmc-red-glow);
+        }
+
+        #converter-page .unit-name {
+            flex: 2;
+            margin-left: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.88em;
+        }
+
+        #converter-page #timestamp {
+            color: var(--text-muted) !important;
+        }
+
+        /* ===== DYNAMIC EFFECTS & ANIMATIONS ===== */
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(200, 35, 51, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(200, 35, 51, 0.04) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(100, 20, 30, 0.05) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        @keyframes bgPulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Title shimmer animation */
+        #decoder-page h1.main-title {
+            background-size: 200% auto;
+            animation: titleShimmer 3s linear infinite;
+        }
+
+        @keyframes titleShimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Page load fade-in */
+        .tab-content.active {
+            animation: fadeSlideIn 0.5s ease-out;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Quick input section entrance */
+        #decoder-page .quick-input-section {
+            animation: cardReveal 0.6s ease-out;
+        }
+
+        /* Decoder card entrance with stagger */
+        #decoder-page .decoder-section:not(.hidden) {
+            animation: decoderReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes decoderReveal {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Rotating border glow on card hover */
+        #decoder-page .decoder-section::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: var(--radius);
+            background: conic-gradient(from 0deg, transparent, var(--tsmc-red), transparent, transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+            animation: rotateBorder 4s linear infinite;
+        }
+
+        #decoder-page .decoder-section {
+            position: relative;
+            overflow: visible;
+        }
+
+        #decoder-page .decoder-section:hover::before {
+            opacity: 0.6;
+        }
+
+        @keyframes rotateBorder {
+            from { background: conic-gradient(from 0deg, transparent, var(--tsmc-red), transparent, transparent); }
+            to { background: conic-gradient(from 360deg, transparent, var(--tsmc-red), transparent, transparent); }
+        }
+
+        /* Input focus pulse ring */
+        #decoder-page .input-area input:focus {
+            animation: inputPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes inputPulse {
+            0%, 100% { box-shadow: 0 0 0 3px var(--tsmc-red-glow), 0 0 12px rgba(200, 35, 51, 0.15); }
+            50% { box-shadow: 0 0 0 5px rgba(200, 35, 51, 0.2), 0 0 20px rgba(200, 35, 51, 0.25); }
+        }
+
+        /* Table row hover effect */
+        #decoder-page tbody tr {
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #decoder-page tbody tr:hover {
+            background: rgba(200, 35, 51, 0.08) !important;
+            transform: translateX(4px);
+            box-shadow: -4px 0 0 var(--tsmc-red);
+        }
+
+        /* Triggered bits flash on appear */
+        #decoder-page .triggered-bits-list p {
+            animation: triggerFlash 0.5s ease-out;
+        }
+
+        @keyframes triggerFlash {
+            0% { opacity: 0; transform: translateX(-12px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Binary output glow pulse */
+        #decoder-page .binary-output:not(:empty) {
+            animation: binaryGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes binaryGlow {
+            from { border-color: rgba(200, 35, 51, 0.15); }
+            to { border-color: rgba(200, 35, 51, 0.4); box-shadow: 0 0 8px rgba(200, 35, 51, 0.15); }
+        }
+
+        /* Tab button click ripple */
+        .tab-nav button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-nav button::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: var(--tsmc-red-glow);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+        }
+
+        .tab-nav button:active::after {
+            width: 200px; height: 200px;
+            opacity: 0.3;
+        }
+
+        /* Download button hover glow expand */
+        #decoder-page .download-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #decoder-page .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        #decoder-page .download-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Converter nav link hover lift */
+        #converter-page .nav a {
+            transition: background-color var(--transition), color var(--transition), box-shadow var(--transition), transform 0.2s ease;
+        }
+
+        #converter-page .nav a:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Converter input group entrance */
+        #converter-page .input-group {
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        #converter-page .input-group:hover {
+            transform: translateX(6px);
+        }
+
+        /* Collapsible button pulse on hover */
+        #converter-page .collapsible {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #converter-page .collapsible::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        #converter-page .collapsible:hover::before {
+            left: 100%;
+        }
+
+        /* Scrollbar styling for dark theme */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(200, 35, 51, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(200, 35, 51, 0.5); }
+    </style>
+
+</head>
+<body>
+
+    <div class="tab-nav">
+        <button class="tab-link active" onclick="openTab(event, 'decoder-page')">狀態碼查詢</button>
+        <button class="tab-link" onclick="openTab(event, 'converter-page')">單位轉換</button>
+    </div>
+
+    <div id="decoder-page" class="tab-content active">
+        <div class="master-container">
+            <h1 class="main-title">Master Controller Decoder</h1>
+
+            <div class="quick-input-section">
+                <div class="input-area">
+                    <label for="quickStatHexInput">STAT</label>
+                    <input type="text" id="quickStatHexInput" placeholder="Enter STAT Code...">
+                </div>
+                <div class="input-area">
+                    <label for="quickInputgHexInput">INPUT G</label>
+                    <input type="text" id="quickInputgHexInput" placeholder="Enter INPUT G Code..." maxlength="2">
+                </div>
+                <div class="input-area">
+                    <label for="quickRncsHexInput">RNCS</label>
+                    <input type="text" id="quickRncsHexInput" placeholder="Enter RNCS Code...">
+                </div>
+                <div class="input-area">
+                    <label for="quickGlstHexInput">GLST</label>
+                    <input type="text" id="quickGlstHexInput" placeholder="Enter GLST Code..." maxlength="8">
+                </div>
+                <div class="input-area">
+                    <label for="quickRlsHexInput">RLS</label>
+                    <input type="text" id="quickRlsHexInput" placeholder="Enter RLS Code..." maxlength="8">
+                </div>
+                <div class="input-area">
+                    <label for="quickAlstHexInput">ALST</label>
+                    <input type="text" id="quickAlstHexInput" placeholder="Enter ALST Code..." maxlength="4">
+                </div>
+            </div>
+
+            <div class="decoders-grid">
+                <!-- STAT Decoder Section -->
+                <div class="decoder-section hidden" id="stat-decoder">
+                    <h2>STAT Decoder</h2>
+                     <div class="input-area">
+                        <label for="statHexInput">STAT ERROR CODE</label>
+                        <input type="text" id="statHexInput" placeholder="Enter Hex Code...">
+                    </div>
+                    <div class="triggered-bits-container">
+                        <div class="triggered-header-wrapper">
+                            <h3>Triggered Bits</h3>
+                            <button class="download-btn hidden" data-target="stat-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="stat-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="stat-binary-output">-</div>
+                    </div>
+                    <table id="statTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- INPUT G Decoder Section -->
+                <div class="decoder-section hidden" id="inputg-decoder">
+                    <h2>INPUT G Decoder</h2>
+                     <div class="input-area">
+                        <label for="inputgHexInput">INPUT G ERROR CODE</label>
+                        <input type="text" id="inputgHexInput" placeholder="Enter Hex Code..." maxlength="2">
+                    </div>
+                    <div class="triggered-bits-container">
+                         <div class="triggered-header-wrapper">
+                            <h3>Active Signals (High)</h3>
+                            <button class="download-btn hidden" data-target="inputg-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="inputg-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="inputg-binary-output">-</div>
+                    </div>
+                    <table id="inputgTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- RNCS Decoder Section -->
+                <div class="decoder-section hidden" id="rncs-decoder">
+                    <h2>RNCS Decoder</h2>
+                     <div class="input-area">
+                        <label for="rncsHexInput">RNCS ERROR CODE</label>
+                        <input type="text" id="rncsHexInput" placeholder="Enter Hex Code...">
+                    </div>
+                    <div class="triggered-bits-container">
+                        <div class="triggered-header-wrapper">
+                            <h3>Triggered Bits</h3>
+                            <button class="download-btn hidden" data-target="rncs-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="rncs-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="rncs-binary-output">-</div>
+                    </div>
+                    <table id="rncsTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- GLST Decoder Section -->
+                <div class="decoder-section hidden" id="glst-decoder">
+                    <h2>GLST Decoder</h2>
+                     <div class="input-area">
+                        <label for="glstHexInput">GLST STATUS CODE</label>
+                        <input type="text" id="glstHexInput" placeholder="Enter Hex Code..." maxlength="8">
+                    </div>
+                    <div class="triggered-bits-container">
+                        <div class="triggered-header-wrapper">
+                            <h3>Triggered Bits</h3>
+                            <button class="download-btn hidden" data-target="glst-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="glst-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="glst-binary-output">-</div>
+                    </div>
+                    <table id="glstTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- RLS Decoder Section -->
+                <div class="decoder-section hidden" id="rls-decoder">
+                    <h2>RLS Decoder</h2>
+                     <div class="input-area">
+                        <label for="rlsHexInput">RLS ERROR CODE</label>
+                        <input type="text" id="rlsHexInput" placeholder="Enter Hex Code..." maxlength="8">
+                    </div>
+                    <div class="triggered-bits-container">
+                        <div class="triggered-header-wrapper">
+                            <h3>Triggered Bits</h3>
+                            <button class="download-btn hidden" data-target="rls-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="rls-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="rls-binary-output">-</div>
+                    </div>
+                    <table id="rlsTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- ALST Decoder Section -->
+                <div class="decoder-section hidden" id="alst-decoder">
+                    <h2>ALST Decoder</h2>
+                     <div class="input-area">
+                        <label for="alstHexInput">ALST ERROR CODE</label>
+                        <input type="text" id="alstHexInput" placeholder="Enter Hex Code..." maxlength="4">
+                    </div>
+                    <div class="triggered-bits-container">
+                        <div class="triggered-header-wrapper">
+                            <h3>Triggered Bits</h3>
+                            <button class="download-btn hidden" data-target="alst-decoder">Download</button>
+                        </div>
+                        <div class="triggered-bits-list" id="alst-triggered-list"><p>None</p></div>
+                    </div>
+                    <div class="binary-output-container">
+                        <p>Binary Representation</p>
+                        <div class="binary-output" id="alst-binary-output">-</div>
+                    </div>
+                    <table id="alstTable">
+                        <thead><tr><th class="bit-col">Bit#</th><th class="desc-col">Description / 中文翻譯</th><th class="result-col">Result</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="converter-page" class="tab-content">
+        <div class="main-container">
+            <div class="nav">
+                <a href="#" class="active" onclick="showConverter('pressure')">氣壓換算</a>
+                <a href="#" onclick="showConverter('currency')">匯率換算</a>
+                <a href="#" onclick="showConverter('numerical')">數字單位換算</a>
+                <a href="#" onclick="showConverter('volume')">體積換算</a>
+                <a href="#" onclick="showConverter('length')">長度換算</a>
+            </div>
+
+            <div id="pressure" class="converter-section">
+                <button type="button" class="collapsible">氣壓換算</button>
+                <div class="content">
+                    <div class="converter-container">
+                        <div class="input-group">
+                            <input type="number" id="torr" placeholder="Torr" oninput="convertPressure('torr', this.value)">
+                            <span class="unit-name">Torr (托)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="pa" placeholder="Pascal (Pa)" oninput="convertPressure('pa', this.value)">
+                            <span class="unit-name">Pascal (Pa) (帕斯卡)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="kpa" placeholder="Kilopascal (kPa)" oninput="convertPressure('kpa', this.value)">
+                            <span class="unit-name">Kilopascal (kPa) (千帕)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="mpa" placeholder="Megapascal (MPa)" oninput="convertPressure('mpa', this.value)">
+                            <span class="unit-name">Megapascal (MPa) (百萬帕)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="psi" placeholder="PSI" oninput="convertPressure('psi', this.value)">
+                            <span class="unit-name">PSI (磅/平方英寸)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="atm" placeholder="Atmosphere (atm)" oninput="convertPressure('atm', this.value)">
+                            <span class="unit-name">Atmosphere (atm) (標準大氣壓)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="bar" placeholder="Bar" oninput="convertPressure('bar', this.value)">
+                            <span class="unit-name">Bar (巴)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="mbar" placeholder="Millibar (mbar)" oninput="convertPressure('mbar', this.value)">
+                            <span class="unit-name">Millibar (mbar) (毫巴)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="kgcm2" placeholder="kg/cm²" oninput="convertPressure('kgcm2', this.value)">
+                            <span class="unit-name">kg/cm² (公斤/平方公分)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="mmhg" placeholder="mmHg" oninput="convertPressure('mmhg', this.value)">
+                            <span class="unit-name">mmHg (毫米汞柱)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="currency" class="converter-section" style="display:none;">
+                 <button type="button" class="collapsible">匯率換算</button>
+                 <div class="content">
+                    <div class="converter-container">
+                        <p id="timestamp" style="text-align: center; color: #555;">正在獲取最新匯率...</p>
+                        <div class="input-group">
+                            <input type="number" id="twd" placeholder="TWD" oninput="convertCurrency('twd', this.value)">
+                            <span class="unit-name">TWD (新台幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="btc" placeholder="BTC" oninput="convertCurrency('btc', this.value)">
+                            <span class="unit-name">BTC (比特幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="eth" placeholder="ETH" oninput="convertCurrency('eth', this.value)">
+                            <span class="unit-name">ETH (以太幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="usd" placeholder="USD" oninput="convertCurrency('usd', this.value)">
+                            <span class="unit-name">USD (美金)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="eur" placeholder="EUR" oninput="convertCurrency('eur', this.value)">
+                            <span class="unit-name">EUR (歐元)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="gbp" placeholder="GBP" oninput="convertCurrency('gbp', this.value)">
+                            <span class="unit-name">GBP (英鎊)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="jpy" placeholder="JPY" oninput="convertCurrency('jpy', this.value)">
+                            <span class="unit-name">JPY (日幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="chf" placeholder="CHF" oninput="convertCurrency('chf', this.value)">
+                            <span class="unit-name">CHF (瑞士法郎)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="aud" placeholder="AUD" oninput="convertCurrency('aud', this.value)">
+                            <span class="unit-name">AUD (澳幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="cad" placeholder="CAD" oninput="convertCurrency('cad', this.value)">
+                            <span class="unit-name">CAD (加拿大幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="cny" placeholder="CNY" oninput="convertCurrency('cny', this.value)">
+                            <span class="unit-name">CNY (人民幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="hkd" placeholder="HKD" oninput="convertCurrency('hkd', this.value)">
+                            <span class="unit-name">HKD (港幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="sgd" placeholder="SGD" oninput="convertCurrency('sgd', this.value)">
+                            <span class="unit-name">SGD (新加坡幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="sek" placeholder="SEK" oninput="convertCurrency('sek', this.value)">
+                            <span class="unit-name">SEK (瑞典克朗)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="krw" placeholder="KRW" oninput="convertCurrency('krw', this.value)">
+                            <span class="unit-name">KRW (韓元)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="nok" placeholder="NOK" oninput="convertCurrency('nok', this.value)">
+                            <span class="unit-name">NOK (挪威克朗)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="nzd" placeholder="NZD" oninput="convertCurrency('nzd', this.value)">
+                            <span class="unit-name">NZD (紐西蘭幣)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="inr" placeholder="INR" oninput="convertCurrency('inr', this.value)">
+                            <span class="unit-name">INR (印度盧比)</span>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="numerical" class="converter-section" style="display:none;">
+                 <button type="button" class="collapsible">數字單位換算</button>
+                 <div class="content">
+                    <div class="converter-container">
+                        <div class="input-group">
+                            <input type="number" id="million" placeholder="Million" oninput="convertNumerical('million', this.value)">
+                            <span class="unit-name">M (百萬)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="billion" placeholder="Billion" oninput="convertNumerical('billion', this.value)">
+                            <span class="unit-name">B (十億)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="trillion" placeholder="Trillion" oninput="convertNumerical('trillion', this.value)">
+                            <span class="unit-name">T (兆)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="wan" placeholder="萬" oninput="convertNumerical('wan', this.value)">
+                            <span class="unit-name">萬</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="yi" placeholder="億" oninput="convertNumerical('yi', this.value)">
+                            <span class="unit-name">億</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="zhao" placeholder="兆" oninput="convertNumerical('zhao', this.value)">
+                            <span class="unit-name">兆</span>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="volume" class="converter-section" style="display:none;">
+                 <button type="button" class="collapsible">體積換算</button>
+                 <div class="content">
+                    <div class="converter-container">
+                        <div class="input-group">
+                            <input type="number" id="m3" placeholder="m³" oninput="convertVolume('m3', this.value)">
+                            <span class="unit-name">m³ (立方公尺)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="cm3" placeholder="cm³" oninput="convertVolume('cm3', this.value)">
+                            <span class="unit-name">cm³ (立方公分)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="l" placeholder="L" oninput="convertVolume('l', this.value)">
+                            <span class="unit-name">L (公升)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="ml" placeholder="mL" oninput="convertVolume('ml', this.value)">
+                            <span class="unit-name">mL (毫升)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="gal" placeholder="gal (US)" oninput="convertVolume('gal', this.value)">
+                            <span class="unit-name">gal (US) (加侖 美制)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="cc" placeholder="c.c." oninput="convertVolume('cc', this.value)">
+                            <span class="unit-name">c.c. (立方公分)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="ft3" placeholder="ft³" oninput="convertVolume('ft3', this.value)">
+                            <span class="unit-name">ft³ (立方英尺)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="floz" placeholder="fl oz" oninput="convertVolume('floz', this.value)">
+                            <span class="unit-name">fl oz (液體盎司)</span>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="length" class="converter-section" style="display:none;">
+                 <button type="button" class="collapsible">長度換算</button>
+                 <div class="content">
+                    <div class="converter-container">
+                        <div class="input-group">
+                            <input type="number" id="m" placeholder="m" oninput="convertLength('m', this.value)">
+                            <span class="unit-name">m (公尺)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="cm" placeholder="cm" oninput="convertLength('cm', this.value)">
+                            <span class="unit-name">cm (公分)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="mm" placeholder="mm" oninput="convertLength('mm', this.value)">
+                            <span class="unit-name">mm (毫米)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="km" placeholder="km" oninput="convertLength('km', this.value)">
+                            <span class="unit-name">km (公里)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="in" placeholder="in" oninput="convertLength('in', this.value)">
+                            <span class="unit-name">in (英寸)</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="ft" placeholder="ft" oninput="convertLength('ft', this.value)">
+                            <span class="unit-name">ft (英尺)</span>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TAB NAVIGATION SCRIPT --- //
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+
+        // --- DECODER SCRIPT (from Master_Decoder.html) --- //
+        const statData = [
+            { bit: 0, description: "Previous command not executed", chinese: "前一指令未執行" },
+            { bit: 1, description: "Alignment in progress", chinese: "校準進行中" },
+            { bit: 2, description: "Vacuum sensor is activated", chinese: "真空產生器已作動" },
+            { bit: 3, description: "Vacuum switch is on", chinese: "真空開關開啟" },
+            { bit: 4, description: "Motor error on one or more axes", chinese: "一個或多個軸馬達錯誤" },
+            { bit: 5, description: "One or more limit switches are triggered", chinese: "一個或多個極限開關被觸發" },
+            { bit: 6, description: "One or more axes are not homed yet", chinese: "一個或多個軸尚未歸位" },
+            { bit: 7, description: "Error on last alignment", chinese: "上次校準錯誤" },
+            { bit: 8, description: "Running Macro", chinese: "巨集執行中" },
+            { bit: 9, description: "One or more axes are moving", chinese: "一個或多個軸移動中" },
+            { bit: 10, description: "Servo off on one or more axes", chinese: "一個或多個軸伺服關閉" },
+            { bit: 11, description: "Error on COM 2", chinese: "COM 2 錯誤" },
+            { bit: 12, description: "Not used", chinese: "未使用" },
+            { bit: 13, description: "NV-SRAM error", chinese: "NV-SRAM 錯誤" },
+            { bit: 14, description: "Controller error", chinese: "控制器錯誤" },
+            { bit: 15, description: "Error on COM 1", chinese: "COM 1 錯誤" }
+        ];
+
+        const inputGData = [
+            { bit: 0, description: "Amplifier internal connection and signal cable close-loop", chinese: "放大器內部連接與信號線閉迴路" },
+            { bit: 1, description: "EMO", chinese: "緊急停止 (EMO)" },
+            { bit: 2, description: "Stop signal", chinese: "停止信號" },
+            { bit: 3, description: "Amplifier board under power. Low if OK", chinese: "放大器板電源開啟 (正常時為 Low)" },
+            { bit: 4, description: "Motor power supply indicator. Low if motor power supply is on", chinese: "馬達電源指示燈 (電源開啟時為 Low)" },
+            { bit: 5, description: "Robot interface board power supply indicator. Low if power is on", chinese: "機械手臂介面板電源指示燈 (電源開啟時為 Low)" },
+            { bit: 6, description: "Switcher indicator. Low if switcher is on", chinese: "交換器指示燈 (交換器開啟時為 Low)" },
+            { bit: 7, description: "Bus power good indicator. Low if all voltages are good", chinese: "匯流排電源良好指示燈 (所有電壓正常時為 Low)" }
+        ];
+
+        const rncsData = [
+            { bit: 0, description: "Check-sum error on robot parameter file", chinese: "機器人參數檔案校驗和錯誤" },
+            { bit: 1, description: "Check-sum error on coordinate file", chinese: "座標檔案校驗和錯誤" },
+            { bit: 2, description: "Check-sum error on Macro file", chinese: "巨集檔案校驗和錯誤" },
+            { bit: 3, description: "Check-sum error on pre-aligner parameter file", chinese: "預校準器參數檔案校驗和錯誤" },
+            { bit: 4, description: "Check-sum error on pre-aligner wafer file", chinese: "預校準器晶圓檔案校驗和錯誤" },
+            { bit: 5, description: "Check-sum error on pre-aligner calibration file", chinese: "預校準器校準檔案校驗和錯誤" },
+            { bit: 6, description: "Check-sum error on auxiliary parameter file", chinese: "輔助參數檔案校驗和錯誤" },
+            { bit: 7, description: "Not used", chinese: "未使用" },
+            { bit: 8, description: "Not used", chinese: "未使用" },
+            { bit: 9, description: "Not used", chinese: "未使用" },
+            { bit: 10, description: "Not used", chinese: "未使用" },
+            { bit: 11, description: "Not used", chinese: "未使用" },
+            { bit: 12, description: "Not used", chinese: "未使用" },
+            { bit: 13, description: "Not used", chinese: "未使用" },
+            { bit: 14, description: "NVSRAM is not formatted or does not exist", chinese: "NVSRAM 未格式化或不存在" },
+            { bit: 15, description: "Not used", chinese: "未使用" }
+        ];
+
+        const glstData32Bit = [
+            { bit: 0, description: "Card 0 time out", chinese: "卡 0 通訊超時" },
+            { bit: 1, description: "Card 0 responds with an error", chinese: "卡 0 回應錯誤" },
+            { bit: 2, description: "Card 0 write data error", chinese: "卡 0 寫入資料錯誤" },
+            { bit: 3, description: "Card 0 debug mode active", chinese: "卡 0 除錯模式啟用" },
+            { bit: 4, description: "Card 1 time out", chinese: "卡 1 通訊超時" },
+            { bit: 5, description: "Card 1 responds with an error", chinese: "卡 1 回應錯誤" },
+            { bit: 6, description: "Card 1 write data error", chinese: "卡 1 寫入資料錯誤" },
+            { bit: 7, description: "Card 1 debug mode active", chinese: "卡 1 除錯模式啟用" },
+            { bit: 8, description: "Position error on T axis (Robot)", chinese: "T 軸 (機械手臂) 位置錯誤" },
+            { bit: 9, description: "Position error on R axis (Robot)", chinese: "R 軸 (機械手臂) 位置錯誤" },
+            { bit: 10, description: "Position error on Z axis (Robot)", chinese: "Z 軸 (機械手臂) 位置錯誤" },
+            { bit: 11, description: "Position error on W axis (Track, Pre-Aligner, DBM, Flipper)", chinese: "W 軸位置錯誤 (軌道, 預校準器, DBM, 翻轉器)" },
+            { bit: 12, description: "Position error on t axis (Pre-Aligner)", chinese: "t 軸 (預校準器) 位置錯誤" },
+            { bit: 13, description: "Position error on r axis (Pre-Aligner)", chinese: "r 軸 (預校準器) 位置錯誤" },
+            { bit: 14, description: "Position error on z axis (Pre-Aligner)", chinese: "z 軸 (預校準器) 位置錯誤" },
+            { bit: 15, description: "Position error on w axis (Track 8-axis)", chinese: "w 軸 (八軸軌道) 位置錯誤" },
+            { bit: 16, description: "T axis motion complete (Robot)", chinese: "T 軸 (機械手臂) 運動完成" },
+            { bit: 17, description: "R axis motion complete (Robot)", chinese: "R 軸 (機械手臂) 運動完成" },
+            { bit: 18, description: "Z axis motion complete (Robot)", chinese: "Z 軸 (機械手臂) 運動完成" },
+            { bit: 19, description: "W axis motion complete (Track, Pre-Aligner, DBM, Flipper)", chinese: "W 軸運動完成 (軌道, 預校準器, DBM, 翻轉器)" },
+            { bit: 20, description: "t axis motion complete (Pre-Aligner)", chinese: "t 軸 (預校準器) 運動完成" },
+            { bit: 21, description: "r axis motion complete (Pre-Aligner)", chinese: "r 軸 (預校準器) 運動完成" },
+            { bit: 22, description: "z axis motion complete (Pre-Aligner)", chinese: "z 軸 (預校準器) 運動完成" },
+            { bit: 23, description: "w axis motion complete (Track 8-axis)", chinese: "w 軸 (八軸軌道) 運動完成" },
+            { bit: 24, description: "T axis servo off (Robot)", chinese: "T 軸 (機械手臂) 伺服關閉" },
+            { bit: 25, description: "R axis servo off (Robot)", chinese: "R 軸 (機械手臂) 伺服關閉" },
+            { bit: 26, description: "Z axis servo off (Robot)", chinese: "Z 軸 (機械手臂) 伺服關閉" },
+            { bit: 27, description: "W axis servo off (Track, Pre-Aligner, DBM, Flipper)", chinese: "W 軸伺服關閉 (軌道, 預校準器, DBM, 翻轉器)" },
+            { bit: 28, description: "t axis servo off (Pre-Aligner)", chinese: "t 軸 (預校準器) 伺服關閉" },
+            { bit: 29, description: "r axis servo off (Pre-Aligner)", chinese: "r 軸 (預校準器) 伺服關閉" },
+            { bit: 30, description: "z axis servo off (Pre-Aligner)", chinese: "z 軸 (預校準器) 伺服關閉" },
+            { bit: 31, description: "w axis servo off (Track 8-axis)", chinese: "w 軸 (八軸軌道) 伺服關閉" }
+        ];
+
+        const glstData16Bit = [
+            { bit: 0, description: "Read/write timeout", chinese: "讀/寫超時" },
+            { bit: 1, description: "Responds with an error", chinese: "回應錯誤" },
+            { bit: 2, description: "Board is in debug mode", chinese: "板子處於除錯模式" },
+            { bit: 3, description: "Galil command error", chinese: "Galil 指令錯誤" },
+            { bit: 4, description: "Reserved", chinese: "保留" },
+            { bit: 5, description: "Position error on Robot T / Pre-Aligner t axis", chinese: "機械手臂 T 軸 / 預校準器 t 軸 位置錯誤" },
+            { bit: 6, description: "Position error on Robot R / Pre-Aligner r axis", chinese: "機械手臂 R 軸 / 預校準器 r 軸 位置錯誤" },
+            { bit: 7, description: "Position error on Robot Z / Pre-Aligner z axis", chinese: "機械手臂 Z 軸 / 預校準器 z 軸 位置錯誤" },
+            { bit: 8, description: "Robot T / Pre-Aligner t axis motion complete", chinese: "機械手臂 T / 預校準器 t 軸 運動完成" },
+            { bit: 9, description: "Robot R / Pre-Aligner r axis motion complete", chinese: "機械手臂 R / 預校準器 r 軸 運動完成" },
+            { bit: 10, description: "Robot Z / Pre-Aligner z axis motion complete", chinese: "機械手臂 Z / 預校準器 z 軸 運動完成" },
+            { bit: 11, description: "Robot T / Pre-Aligner t axis servo off", chinese: "機械手臂 T / 預校準器 t 軸 伺服關閉" },
+            { bit: 12, description: "Robot R / Pre-Aligner r axis servo off", chinese: "機械手臂 R / 預校準器 r 軸 伺服關閉" },
+            { bit: 13, description: "Robot Z / Pre-Aligner z axis servo off", chinese: "機械手臂 Z / 預校準器 z 軸 伺服關閉" },
+            { bit: 14, description: "Reserved", chinese: "保留" },
+            { bit: 15, description: "Reserved", chinese: "保留" }
+        ];
+
+        const rlsData32Bit = [
+            { bit: 0, description: "Robot positive T", chinese: "機器人 T 軸正極限" },
+            { bit: 1, description: "Robot positive R", chinese: "機器人 R 軸正極限" },
+            { bit: 2, description: "Robot positive Z", chinese: "機器人 Z 軸正極限" },
+            { bit: 3, description: "*Track/Flipper/Pre-Aligner positive W", chinese: "滑軌/翻轉器/預對準器 W 軸正極限" },
+            { bit: 4, description: "Pre-Aligner positive t", chinese: "預對準器 t 軸正極限" },
+            { bit: 5, description: "Pre-Aligner positive r", chinese: "預對準器 r 軸正極限" },
+            { bit: 6, description: "Pre-Aligner positive z", chinese: "預對準器 z 軸正極限" },
+            { bit: 7, description: "*Track positive w", chinese: "滑軌 w 軸正極限" },
+            { bit: 8, description: "Robot negative T", chinese: "機器人 T 軸負極限" },
+            { bit: 9, description: "Robot negative R", chinese: "機器人 R 軸負極限" },
+            { bit: 10, description: "Robot negative Z", chinese: "機器人 Z 軸負極限" },
+            { bit: 11, description: "*Track/Flipper/Pre-Aligner negative W", chinese: "滑軌/翻轉器/預對準器 W 軸負極限" },
+            { bit: 12, description: "Pre-Aligner negative t", chinese: "預對準器 t 軸負極限" },
+            { bit: 13, description: "Pre-Aligner negative r", chinese: "預對準器 r 軸負極限" },
+            { bit: 14, description: "Pre-Aligner negative z", chinese: "預對準器 z 軸負極限" },
+            { bit: 15, description: "*Track negative w", chinese: "滑軌 w 軸負極限" },
+            { bit: 16, description: "Robot positive T triggered", chinese: "機器人 T 軸正極限已觸發" },
+            { bit: 17, description: "Robot positive R triggered", chinese: "機器人 R 軸正極限已觸發" },
+            { bit: 18, description: "Robot positive Z triggered", chinese: "機器人 Z 軸正極限已觸發" },
+            { bit: 19, description: "*Track/Flipper/Pre-Aligner positive W triggered", chinese: "滑軌/翻轉器/預對準器 W 軸正極限已觸發" },
+            { bit: 20, description: "Pre-Aligner positive t triggered", chinese: "預對準器 t 軸正極限已觸發" },
+            { bit: 21, description: "Pre-Aligner positive r triggered", chinese: "預對準器 r 軸正極限已觸發" },
+            { bit: 22, description: "Pre-Aligner positive z triggered", chinese: "預對準器 z 軸正極限已觸發" },
+            { bit: 23, description: "*Track positive w triggered", chinese: "滑軌 w 軸正極限已觸發" },
+            { bit: 24, description: "Robot negative T triggered", chinese: "機器人 T 軸負極限已觸發" },
+            { bit: 25, description: "Robot negative R triggered", chinese: "機器人 R 軸負極限已觸發" },
+            { bit: 26, description: "Robot negative Z triggered", chinese: "機器人 Z 軸負極限已觸發" },
+            { bit: 27, description: "*Track/Flipper/Pre-Aligner negative W triggered", chinese: "滑軌/翻轉器/預對準器 W 軸負極限已觸發" },
+            { bit: 28, description: "Pre-Aligner negative t triggered", chinese: "預對準器 t 軸負極限已觸發" },
+            { bit: 29, description: "Pre-Aligner negative r triggered", chinese: "預對準器 r 軸負極限已觸發" },
+            { bit: 30, description: "Pre-Aligner negative z triggered", chinese: "預對準器 z 軸負極限已觸發" },
+            { bit: 31, description: "*Track negative w triggered", chinese: "滑軌 w 軸負極限已觸發" }
+        ];
+
+        const rlsData16Bit = [
+            { bit: 0, description: "Robot positive T", chinese: "機器人 T 軸正極限" },
+            { bit: 1, description: "Robot positive R", chinese: "機器人 R 軸正極限" },
+            { bit: 2, description: "Robot positive Z", chinese: "機器人 Z 軸正極限" },
+            { bit: 3, description: "Robot negative T", chinese: "機器人 T 軸負極限" },
+            { bit: 4, description: "Robot negative R", chinese: "機器人 R 軸負極限" },
+            { bit: 5, description: "Robot negative Z", chinese: "機器人 Z 軸負極限" },
+            { bit: 6, description: "Robot positive T triggered", chinese: "機器人 T 軸正極限已觸發" },
+            { bit: 7, description: "Robot positive R triggered", chinese: "機器人 R 軸正極限已觸發" },
+            { bit: 8, description: "Robot positive Z triggered", chinese: "機器人 Z 軸正極限已觸發" },
+            { bit: 9, description: "Robot negative T triggered", chinese: "機器人 T 軸負極限已觸發" },
+            { bit: 10, description: "Robot negative R triggered", chinese: "機器人 R 軸負極限已觸發" },
+            { bit: 11, description: "Robot negative Z triggered", chinese: "機器人 Z 軸負極限已觸發" },
+            { bit: 12, description: "Reserved", chinese: "保留" },
+            { bit: 13, description: "Reserved", chinese: "保留" },
+            { bit: 14, description: "Reserved", chinese: "保留" },
+            { bit: 15, description: "Reserved", chinese: "保留" }
+        ];
+
+        const alstData = [
+            { bit: 0, description: "Wafer is not found on chuck", chinese: "吸盤上未偵測到晶圓" },
+            { bit: 1, description: "Alignment has been repeated maximum tries and failed", chinese: "對準已達最大重試次數仍失敗" },
+            { bit: 2, description: "No flat or notch found", chinese: "未偵測到平邊 (Flat) 或缺口 (Notch)" },
+            { bit: 3, description: "No center offset vector found", chinese: "未偵測到中心偏移向量" },
+            { bit: 4, description: "Pre-Aligner has not been homed", chinese: "預對準器尚未完成初始化 (Home)" },
+            { bit: 5, description: "Servo motor is off (use SVON or see STAT bit 10)", chinese: "伺服馬達處於關閉狀態 (使用 SVON 或參見 STAT bit 10)" },
+            { bit: 6, description: "Reserved", chinese: "保留" },
+            { bit: 7, description: "Incorrect speeds and/or accelerations used", chinese: "速度及/或加速度參數設定錯誤" },
+            { bit: 8, description: "Arithmetic calculation error; attempted to divide by zero (0)", chinese: "算術運算錯誤：嘗試除以零" },
+            { bit: 9, description: "Reserved", chinese: "保留" },
+            { bit: 10, description: "Reserved", chinese: "保留" },
+            { bit: 11, description: "Alignment repeated one or more cycles", chinese: "對準過程重複執行一次或多次" },
+            { bit: 12, description: "Reserved", chinese: "保留" },
+            { bit: 13, description: "Incorrect wafer size or wafer type has been specified", chinese: "指定了錯誤的晶圓尺寸或類型" },
+            { bit: 14, description: "Reserved", chinese: "保留" },
+            { bit: 15, description: "Reserved", chinese: "保留" }
+        ];
+
+        function renderDecoder(config, value, data, bitLength) {
+            const hexValue = value.trim().toUpperCase();
+            config.tableBodyEl.innerHTML = '';
+            config.triggeredListEl.innerHTML = '<p>None</p>';
+
+            if (hexValue && !/^[0-9A-F]*$/i.test(hexValue)) {
+                config.binaryOutputEl.textContent = 'Invalid Hexadecimal Input';
+                config.downloadBtn.classList.add('hidden');
+                return;
+            }
+
+            if (hexValue) {
+                config.downloadBtn.classList.remove('hidden');
+            } else {
+                config.downloadBtn.classList.add('hidden');
+            }
+
+            const intValue = hexValue ? parseInt(hexValue, 16) : 0;
+            const binaryString = intValue.toString(2).padStart(bitLength, '0');
+
+            config.binaryOutputEl.textContent = binaryString.replace(/(.{4})/g, '$1 ').trim();
+
+            let hasTriggeredBit = false;
+            let triggeredCount = 0;
+
+            data.forEach(item => {
+                const bitIndexInString = (bitLength - 1) - item.bit;
+                if (bitIndexInString < 0 || bitIndexInString >= binaryString.length) return;
+
+                const bitValue = binaryString[bitIndexInString];
+                const isTriggered = bitValue === '1';
+
+                let resultText, resultBadge, rowClass, isConsideredActive;
+
+                if (config.type === 'inputg') {
+                    resultBadge = isTriggered
+                        ? '<span style="color:#ff4d5e;font-weight:700">● High</span>'
+                        : '<span style="color:#4ade80;font-weight:600">● Low</span>';
+                    rowClass = isTriggered ? 'high' : '';
+                    isConsideredActive = isTriggered;
+                } else {
+                    const isNA = (config.naConditions || []).some(cond => item.description.includes(cond));
+                    if (isNA) {
+                        resultBadge = '<span style="color:#6b7280;font-weight:500">— N/A</span>';
+                    } else if (isTriggered) {
+                        resultBadge = '<span style="color:#ff4d5e;font-weight:700;text-shadow:0 0 6px rgba(255,77,94,0.4)">▲ True</span>';
+                    } else {
+                        resultBadge = '<span style="color:#4ade80;font-weight:600">● False</span>';
+                    }
+                    rowClass = (isTriggered && !isNA) ? 'true' : '';
+                    isConsideredActive = (isTriggered && !isNA);
+                }
+
+                const row = document.createElement('tr');
+                if (rowClass) row.classList.add(rowClass);
+
+                if (isConsideredActive) {
+                    triggeredCount++;
+                    if (!hasTriggeredBit) {
+                        config.triggeredListEl.innerHTML = '';
+                        hasTriggeredBit = true;
+                    }
+                    const p = document.createElement('p');
+                    p.innerHTML = `<b>Bit ${item.bit}:</b> ${item.description} <span class="chinese-desc">(${item.chinese})</span>`;
+                    config.triggeredListEl.appendChild(p);
+                }
+
+                row.innerHTML = `
+                    <td class="bit-col">${item.bit}</td>
+                    <td class="desc-col">${item.description}<span class="chinese-desc">${item.chinese}</span></td>
+                    <td class="result-col">${resultBadge}</td>
+                `;
+                config.tableBodyEl.appendChild(row);
+            });
+
+            // Update triggered header with count badge
+            const h3 = config.triggeredListEl.closest('.triggered-bits-container').querySelector('h3');
+            const baseName = config.type === 'inputg' ? 'Active Signals (High)' : 'Triggered Bits';
+            if (triggeredCount > 0) {
+                h3.innerHTML = `${baseName} <span style="background:var(--status-true);color:#fff;padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:8px;">${triggeredCount}</span>`;
+            } else {
+                h3.textContent = baseName;
+            }
+        }
+
+        function updateDecoder(config, value) {
+            if (config.type === 'glst' || config.type === 'rls') {
+                const hexValue = value.trim().toUpperCase();
+                const use32Bit = hexValue.length > 4;
+                const data = use32Bit ? config.data32 : config.data16;
+                const bitLength = use32Bit ? 32 : 16;
+                renderDecoder(config, value, data, bitLength);
+            } else {
+                renderDecoder(config, value, config.data, config.bitLength);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const decoderConfigs = {
+                stat: {
+                    type: 'stat',
+                    inputEl: document.getElementById('statHexInput'),
+                    quickInputEl: document.getElementById('quickStatHexInput'),
+                    binaryOutputEl: document.getElementById('stat-binary-output'),
+                    tableBodyEl: document.querySelector("#statTable tbody"),
+                    triggeredListEl: document.getElementById('stat-triggered-list'),
+                    decoderEl: document.getElementById('stat-decoder'),
+                    downloadBtn: document.querySelector("[data-target='stat-decoder']"),
+                    data: statData,
+                    bitLength: 16,
+                    naConditions: ["Not used", "Alignment in progress"]
+                },
+                inputg: {
+                    type: 'inputg',
+                    inputEl: document.getElementById('inputgHexInput'),
+                    quickInputEl: document.getElementById('quickInputgHexInput'),
+                    binaryOutputEl: document.getElementById('inputg-binary-output'),
+                    tableBodyEl: document.querySelector("#inputgTable tbody"),
+                    triggeredListEl: document.getElementById('inputg-triggered-list'),
+                    decoderEl: document.getElementById('inputg-decoder'),
+                    downloadBtn: document.querySelector("[data-target='inputg-decoder']"),
+                    data: inputGData,
+                    bitLength: 8,
+                    naConditions: []
+                },
+                rncs: {
+                    type: 'rncs',
+                    inputEl: document.getElementById('rncsHexInput'),
+                    quickInputEl: document.getElementById('quickRncsHexInput'),
+                    binaryOutputEl: document.getElementById('rncs-binary-output'),
+                    tableBodyEl: document.querySelector("#rncsTable tbody"),
+                    triggeredListEl: document.getElementById('rncs-triggered-list'),
+                    decoderEl: document.getElementById('rncs-decoder'),
+                    downloadBtn: document.querySelector("[data-target='rncs-decoder']"),
+                    data: rncsData,
+                    bitLength: 16,
+                    naConditions: ["Not used", "auxiliary parameter file"]
+                },
+                glst: {
+                    type: 'glst',
+                    inputEl: document.getElementById('glstHexInput'),
+                    quickInputEl: document.getElementById('quickGlstHexInput'),
+                    binaryOutputEl: document.getElementById('glst-binary-output'),
+                    tableBodyEl: document.querySelector("#glstTable tbody"),
+                    triggeredListEl: document.getElementById('glst-triggered-list'),
+                    decoderEl: document.getElementById('glst-decoder'),
+                    downloadBtn: document.querySelector("[data-target='glst-decoder']"),
+                    data16: glstData16Bit,
+                    data32: glstData32Bit,
+                    naConditions: ["Reserved"]
+                },
+                rls: {
+                    type: 'rls',
+                    inputEl: document.getElementById('rlsHexInput'),
+                    quickInputEl: document.getElementById('quickRlsHexInput'),
+                    binaryOutputEl: document.getElementById('rls-binary-output'),
+                    tableBodyEl: document.querySelector("#rlsTable tbody"),
+                    triggeredListEl: document.getElementById('rls-triggered-list'),
+                    decoderEl: document.getElementById('rls-decoder'),
+                    downloadBtn: document.querySelector("[data-target='rls-decoder']"),
+                    data16: rlsData16Bit,
+                    data32: rlsData32Bit,
+                    naConditions: ["Reserved"]
+                },
+                alst: {
+                    type: 'alst',
+                    inputEl: document.getElementById('alstHexInput'),
+                    quickInputEl: document.getElementById('quickAlstHexInput'),
+                    binaryOutputEl: document.getElementById('alst-binary-output'),
+                    tableBodyEl: document.querySelector("#alstTable tbody"),
+                    triggeredListEl: document.getElementById('alst-triggered-list'),
+                    decoderEl: document.getElementById('alst-decoder'),
+                    downloadBtn: document.querySelector("[data-target='alst-decoder']"),
+                    data: alstData,
+                    bitLength: 16,
+                    naConditions: ["Reserved"]
+                }
+            };
+
+            function setupSync(config) {
+                const handleInput = (e) => {
+                    const value = e.target.value;
+                    config.inputEl.value = value;
+                    config.quickInputEl.value = value;
+                    updateDecoder(config, value);
+
+                    if (value) {
+                        config.decoderEl.classList.remove('hidden');
+                    } else {
+                        config.decoderEl.classList.add('hidden');
+                    }
+                };
+
+                config.quickInputEl.addEventListener('input', handleInput);
+                config.inputEl.addEventListener('input', handleInput);
+            }
+
+            function handleDownload(e) {
+                const targetId = e.target.dataset.target;
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    html2canvas(targetEl, { 
+                        backgroundColor: getComputedStyle(document.body).backgroundColor 
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = `${targetId}_result.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    });
+                }
+            }
+
+            Object.values(decoderConfigs).forEach(config => {
+                setupSync(config);
+                updateDecoder(config, '');
+                config.downloadBtn.addEventListener('click', handleDownload);
+            });
+        });
+
+
+        // --- CONVERTER SCRIPT (from PressureConverter/index.html) --- //
+        const pressureFactors = {
+            pa: 1, kpa: 1000, mpa: 1000000, psi: 6894.76, atm: 101325, bar: 100000,
+            mbar: 100, torr: 133.322, kgcm2: 98066.5, mmhg: 133.322
+        };
+        const currencyFactors = { 
+            twd: 1, usd: 32.5, eur: 35.2, jpy: 0.21, gbp: 41.0, cny: 4.5, aud: 21.5, cad: 23.8, 
+            chf: 36.0, hkd: 4.15, sgd: 24.0, sek: 3.1, krw: 0.023, nok: 3.0, nzd: 20.0, inr: 0.39, 
+            btc: 2000000, eth: 100000 
+        };
+        const numericalFactors = {
+            million: 1000000, billion: 1000000000, trillion: 1000000000000,
+            wan: 10000, yi: 100000000, zhao: 1000000000000
+        };
+        const volumeFactors = { m3: 1, cm3: 0.000001, l: 0.001, ml: 0.000001, gal: 0.00378541, cc: 0.000001, ft3: 0.0283168, floz: 0.0000295735 };
+        const lengthFactors = { m: 1, cm: 0.01, mm: 0.001, km: 1000, in: 0.0254, ft: 0.3048 };
+
+        function convert(fromUnit, value, factors, clearInputsFunc) {
+            if (value === '' || isNaN(value)) {
+                clearInputsFunc();
+                return;
+            }
+            const baseValue = parseFloat(value) * factors[fromUnit];
+            for (const unit in factors) {
+                const inputElement = document.getElementById(unit);
+                if (unit !== fromUnit && inputElement) {
+                    const convertedValue = baseValue / factors[unit];
+                    inputElement.value = convertedValue.toPrecision(6);
+                }
+            }
+        }
+
+        function convertPressure(fromUnit, value) { convert(fromUnit, value, pressureFactors, clearPressureInputs); }
+        function convertCurrency(fromUnit, value) { convert(fromUnit, value, currencyFactors, clearCurrencyInputs); }
+        function convertVolume(fromUnit, value) { convert(fromUnit, value, volumeFactors, clearVolumeInputs); }
+        function convertLength(fromUnit, value) { convert(fromUnit, value, lengthFactors, clearLengthInputs); }
+        function convertNumerical(fromUnit, value) { convert(fromUnit, value, numericalFactors, clearNumericalInputs); }
+
+        function clearInputs(factors) {
+            for (const unit in factors) {
+                const inputElement = document.getElementById(unit);
+                if(inputElement) {
+                    inputElement.value = '';
+                }
+            }
+        }
+
+        function clearPressureInputs() { clearInputs(pressureFactors); }
+        function clearCurrencyInputs() { clearInputs(currencyFactors); }
+        function clearVolumeInputs() { clearInputs(volumeFactors); }
+        function clearLengthInputs() { clearInputs(lengthFactors); }
+        function clearNumericalInputs() { clearInputs(numericalFactors); }
+
+        async function fetchRates() {
+            try {
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/TWD');
+                const data = await response.json();
+                const rates = data.rates;
+
+                for (const currency in currencyFactors) {
+                    if (rates[currency.toUpperCase()]) {
+                        currencyFactors[currency] = 1 / rates[currency.toUpperCase()];
+                    }
+                }
+                currencyFactors['twd'] = 1;
+
+                const cryptoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=twd');
+                const cryptoData = await cryptoResponse.json();
+                currencyFactors['btc'] = cryptoData.bitcoin.twd;
+                currencyFactors['eth'] = cryptoData.ethereum.twd;
+
+                updateTimestamp(data.time_last_updated);
+            } catch (error) {
+                console.error("Error fetching rates:", error);
+                document.getElementById('timestamp').innerText = '無法獲取最新匯率，將使用預設值。';
+            }
+        }
+
+        function updateTimestamp(timestamp) {
+            const date = new Date(timestamp * 1000);
+            document.getElementById('timestamp').innerText = `匯率最後更新時間：${date.toLocaleString()}`;
+        }
+
+        var coll = document.getElementsByClassName("collapsible");
+        for (let i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.maxHeight){
+              content.style.maxHeight = null;
+            } else {
+              content.style.maxHeight = content.scrollHeight + "px";
+            } 
+          });
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchRates();
+            var pressureCollapsible = document.querySelector("#pressure .collapsible");
+            var pressureContent = pressureCollapsible.nextElementSibling;
+            pressureCollapsible.classList.add("active");
+            pressureContent.style.maxHeight = pressureContent.scrollHeight + "px";
+        });
+
+        function showConverter(converterName) {
+            var sections = document.getElementsByClassName('converter-section');
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].style.display = 'none';
+            }
+            document.getElementById(converterName).style.display = 'block';
+            
+            var navLinks = document.querySelectorAll('#converter-page .nav a');
+            navLinks.forEach(function(link) {
+                link.classList.remove('active');
+            });
+            
+            event.currentTarget.classList.add('active');
+
+            var newActiveCollapsible = document.querySelector("#" + converterName + " .collapsible");
+            var newActiveContent = newActiveCollapsible.nextElementSibling;
+            if (!newActiveCollapsible.classList.contains('active')) {
+                 newActiveCollapsible.classList.add("active");
+                 newActiveContent.style.maxHeight = newActiveContent.scrollHeight + "px";
+            }
+        }
+    </script>
+</body>
+</html>
