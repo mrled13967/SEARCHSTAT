@@ -1606,17 +1606,34 @@
             };
 
             function setupSync(config) {
+                let isUpdating = false;
+                let debounceTimer = null;
+
                 const handleInput = (e) => {
+                    // 防止 iOS Safari 程式設值也觸發 input event 造成無限迴圈
+                    if (isUpdating) return;
+                    isUpdating = true;
+
                     const value = e.target.value;
+
+                    // 同步兩個輸入框的值
                     config.inputEl.value = value;
                     config.quickInputEl.value = value;
-                    updateDecoder(config, value);
 
+                    // 立即顯示/隱藏 decoder 卡片
                     if (value) {
                         config.decoderEl.classList.remove('hidden');
                     } else {
                         config.decoderEl.classList.add('hidden');
                     }
+
+                    isUpdating = false;
+
+                    // Debounce DOM 重建（手機上避免每個字都暴力重繪 table）
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        updateDecoder(config, value);
+                    }, 80);
                 };
 
                 config.quickInputEl.addEventListener('input', handleInput);
