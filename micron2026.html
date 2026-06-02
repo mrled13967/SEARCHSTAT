@@ -1,0 +1,4339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美光承攬商入場模擬測驗系統 (2026)</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0c10;
+            --bg-card: #12161f;
+            --bg-input: #1a202c;
+            --accent-red: #ff3344;
+            --accent-red-glow: rgba(255, 51, 68, 0.4);
+            --accent-green: #00e676;
+            --accent-green-glow: rgba(0, 230, 118, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #242b3a;
+            --border-hover: #3b4760;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Header section */
+        header {
+            width: 100%;
+            max-width: 900px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(18, 22, 31, 0.5) 0%, rgba(10, 12, 16, 0) 100%);
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #ff3344, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 51, 68, 0.3);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            font-size: 0.9rem;
+            background: var(--accent-red);
+            color: white;
+            -webkit-text-fill-color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 900;
+            letter-spacing: 0px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-red);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-red-glow);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        /* Content Sections */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Bar */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .stat-value small {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 15px;
+            bottom: 10px;
+            font-size: 2.5rem;
+            opacity: 0.05;
+            color: var(--text-primary);
+        }
+
+        /* Practice Area Card */
+        .practice-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        /* Question Header */
+        .q-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .q-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .q-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .q-badge.mc {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .q-badge.tf {
+            background-color: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .q-id {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+        }
+
+        .q-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.2rem;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--border-hover);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        .btn-icon.active {
+            background-color: rgba(234, 179, 8, 0.15);
+            border-color: #eab308;
+            color: #facc15;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
+        }
+
+        /* Question Body */
+        .q-body {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .q-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        /* Option Buttons */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            line-height: 1.4;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--border-hover);
+            background-color: var(--bg-card);
+            transform: translateX(4px);
+        }
+
+        .option-idx {
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Feedback styling */
+        .option-btn.correct {
+            background-color: rgba(0, 230, 118, 0.1) !important;
+            border-color: var(--accent-green) !important;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.15) !important;
+        }
+
+        .option-btn.correct .option-idx {
+            background-color: var(--accent-green);
+            color: #000;
+            border-color: var(--accent-green);
+        }
+
+        .option-btn.incorrect {
+            background-color: rgba(255, 51, 68, 0.1) !important;
+            border-color: var(--accent-red) !important;
+            box-shadow: 0 0 15px rgba(255, 51, 68, 0.15) !important;
+        }
+
+        .option-btn.incorrect .option-idx {
+            background-color: var(--accent-red);
+            color: white;
+            border-color: var(--accent-red);
+        }
+
+        .option-btn.reveal-correct {
+            border-color: var(--accent-green) !important;
+            background-color: rgba(0, 230, 118, 0.05) !important;
+        }
+
+        .option-btn.disabled {
+            cursor: default;
+        }
+
+        /* Answer Feedback Message */
+        .feedback-box {
+            display: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.correct {
+            display: flex;
+            background-color: rgba(0, 230, 118, 0.08);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            color: var(--accent-green);
+        }
+
+        .feedback-box.incorrect {
+            display: flex;
+            background-color: rgba(255, 51, 68, 0.08);
+            border: 1px solid rgba(255, 51, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        /* Question Navigation Footer */
+        .q-nav-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--border-hover);
+            border-color: var(--text-secondary);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-red-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #ff5566;
+            border-color: #ff5566;
+            transform: translateY(-1px);
+        }
+
+        /* Progress Area */
+        .progress-container {
+            width: 100%;
+            background-color: var(--bg-input);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), #ff6b6b);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        /* Question Selector */
+        .jump-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 20px;
+            flex-wrap: wrap;
+        }
+
+        .jump-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        select:focus {
+            border-color: var(--accent-red);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        /* Exam Setup Container */
+        .exam-setup {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .exam-icon {
+            font-size: 4rem;
+            color: var(--accent-red);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .exam-rules {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .exam-rules h4 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .exam-rule-item {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Timer Badge */
+        .timer-badge {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Exam Results Card */
+        .result-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-color: var(--bg-input);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .score-circle.pass {
+            border: 6px solid var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 230, 118, 0.2);
+        }
+
+        .score-circle.fail {
+            border: 6px solid var(--accent-red);
+            box-shadow: 0 0 30px rgba(255, 51, 68, 0.2);
+        }
+
+        .score-num {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .score-num.pass { color: var(--accent-green); }
+        .score-num.fail { color: var(--accent-red); }
+
+        .score-lbl {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .result-badge {
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-badge.pass {
+            background-color: rgba(0, 230, 118, 0.15);
+            color: var(--accent-green);
+            border: 1.5px solid var(--accent-green);
+        }
+
+        .result-badge.fail {
+            background-color: rgba(255, 51, 68, 0.15);
+            color: var(--accent-red);
+            border: 1.5px solid var(--accent-red);
+        }
+
+        /* Wrong Questions Review List */
+        .review-section {
+            width: 100%;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .review-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-red);
+            padding-left: 10px;
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Scrollbar styling */
+        .review-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .review-list::-webkit-scrollbar-track {
+            background: var(--bg-card);
+        }
+        .review-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        .review-list::-webkit-scrollbar-thumb:hover {
+            background: var(--border-hover);
+        }
+
+        .review-item {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .review-q {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-ans-row {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .review-user-ans { color: var(--accent-red); }
+        .review-correct-ans { color: var(--accent-green); }
+
+        /* Filter buttons */
+        .filter-panel {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-chip.active {
+            background-color: rgba(255, 51, 68, 0.1);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* Empty States */
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            width: 100%;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            background-color: rgba(18, 22, 31, 0.2);
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover {
+            color: var(--accent-red);
+        }
+
+        /* Responsive UI adjustments */
+        @media (max-width: 768px) {
+            header {
+                padding: 20px 15px;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .practice-card {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .q-text {
+                font-size: 1.1rem;
+            }
+
+            .option-btn {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+
+            .q-nav-footer {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .q-nav-footer button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">MICRON <span>CONTRACTOR</span></div>
+        <div class="subtitle">美光承攬商入場安衛模擬測驗系統 (2026 最新版)</div>
+    </header>
+
+    <div class="container">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('practice')">
+                <span>📝</span> 一題一題問模式
+            </button>
+            <button class="tab-btn" onclick="switchTab('exam')">
+                <span>⚡</span> 隨機模擬考
+            </button>
+        </div>
+
+        <!-- PRACTICE MODE CONTENT -->
+        <div id="practice-tab" class="tab-content active">
+            
+            <!-- Statistics Bar -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">答題進度</span>
+                    <span id="stat-progress-val" class="stat-value">0 <small>/ 253</small></span>
+                    <span class="stat-icon">📈</span>
+                </div>
+                <div class="stat-card" onclick="activateFilter('wrong')" style="cursor: pointer;">
+                    <span class="stat-label" style="display:flex;align-items:center;gap:5px;">錯題筆記 <span style="background:var(--accent-red);color:white;width:6px;height:6px;border-radius:50%;display:inline-block;animation:pulse 1s infinite;"></span></span>
+                    <span id="stat-wrong-val" class="stat-value" style="color: var(--accent-red);">0 <small>題</small></span>
+                    <span class="stat-icon">❌</span>
+                </div>
+                <div class="stat-card" onclick="activateFilter('starred')" style="cursor: pointer;">
+                    <span class="stat-label">收藏題目</span>
+                    <span id="stat-starred-val" class="stat-value" style="color: #facc15;">0 <small>題</small></span>
+                    <span class="stat-icon">⭐</span>
+                </div>
+            </div>
+
+            <!-- Filters Panel -->
+            <div class="filter-panel">
+                <div id="filter-all" class="filter-chip active" onclick="setFilter('all')">📚 全部 253 題</div>
+                <div id="filter-wrong" class="filter-chip" onclick="setFilter('wrong')">❌ 錯題本 (<span id="filter-wrong-count">0</span>)</div>
+                <div id="filter-starred" class="filter-chip" onclick="setFilter('starred')">⭐ 我的最愛 (<span id="filter-starred-count">0</span>)</div>
+                <button class="btn-icon" onclick="resetProgress()" title="重置所有歷史紀錄" style="margin-left:auto;background:none;border:none;font-size:1.1rem;">🔄</button>
+            </div>
+
+            <!-- Question practice card -->
+            <div id="question-card" class="practice-card">
+                <div class="q-header">
+                    <div class="q-meta">
+                        <span id="q-type-badge" class="q-badge mc">選擇題</span>
+                        <span id="q-num-label" class="q-id">第 1 / 253 題</span>
+                    </div>
+                    <div class="q-actions">
+                        <button id="star-btn" class="btn-icon" onclick="toggleStar()" title="收藏此題">⭐</button>
+                    </div>
+                </div>
+
+                <div class="q-body">
+                    <div id="q-text" class="q-text">讀取中...</div>
+                    <div id="options-list" class="options-list">
+                        <!-- Options injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Correct/Incorrect Alert Box -->
+                <div id="feedback-box" class="feedback-box">
+                    <span id="feedback-icon" style="font-size: 1.4rem;"></span>
+                    <span id="feedback-text"></span>
+                </div>
+
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+
+                <div class="q-nav-footer">
+                    <button id="prev-btn" class="btn" onclick="prevQuestion()" disabled>
+                        <span>◀</span> 上一題
+                    </button>
+                    <button id="next-btn" class="btn btn-primary" onclick="nextQuestion()">
+                        下一題 <span>▶</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Jump to Question Section -->
+            <div id="jump-panel" class="jump-container">
+                <span class="jump-label">快速跳轉至指定題目:</span>
+                <div class="select-wrapper">
+                    <select id="jump-select" onchange="jumpToQuestion(this.value)">
+                        <!-- Options generated dynamically -->
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- EXAM MODE CONTENT -->
+        <div id="exam-tab" class="tab-content">
+            
+            <!-- Setup Exam Card -->
+            <div id="exam-setup-card" class="exam-setup">
+                <div class="exam-icon">⚡</div>
+                <h2>美光承攬商入場安衛模擬測驗</h2>
+                <p style="color:var(--text-secondary); max-width:600px;">本系統模擬真實美光承攬商入廠測驗，隨機抽出 50 題考題（是非題與選擇題），必須在 45 分鐘內作答完畢。</p>
+                
+                <div class="exam-rules">
+                    <h4>📝 測驗規則:</h4>
+                    <div class="exam-rule-item"><span>📌</span> 隨機抽取 50 題，每題 2 分。</div>
+                    <div class="exam-rule-item"><span>⏱️</span> 測驗時間 45 分鐘，時間到自動收卷。</div>
+                    <div class="exam-rule-item"><span>🎯</span> 及格標準為 84 分 (需答對 42 題以上)。</div>
+                    <div class="exam-rule-item"><span>💡</span> 模擬考期間無法立即查看正確答案。</div>
+                </div>
+
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size:1.15rem;" onclick="startExam()">
+                    🚀 開始模擬測驗
+                </button>
+            </div>
+
+            <!-- Exam In Progress Card -->
+            <div id="exam-progress-card" class="practice-card" style="display: none;">
+                <div class="q-header">
+                    <div class="q-meta">
+                        <span id="exam-q-type" class="q-badge mc">選擇題</span>
+                        <span id="exam-q-num" class="q-id">考題 1 / 50</span>
+                    </div>
+                    <div class="timer-badge">
+                        <span>⏱️</span> <span id="exam-timer">45:00</span>
+                    </div>
+                </div>
+
+                <div class="q-body">
+                    <div id="exam-q-text" class="q-text">讀取中...</div>
+                    <div id="exam-options-list" class="options-list">
+                        <!-- Options injected dynamically -->
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div id="exam-progress-bar" class="progress-bar" style="width: 2%;"></div>
+                </div>
+
+                <div class="q-nav-footer">
+                    <button id="exam-prev-btn" class="btn" onclick="prevExamQuestion()" disabled>
+                        <span>◀</span> 上一題
+                    </button>
+                    <button id="exam-next-btn" class="btn btn-primary" onclick="nextExamQuestion()">
+                        下一題 <span>▶</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Results Card -->
+            <div id="exam-result-card" class="result-card" style="display: none;">
+                <h2>測驗結果報告</h2>
+                
+                <div id="score-circle" class="score-circle">
+                    <span id="score-val" class="score-num">0</span>
+                    <span class="score-lbl">得分 (滿分100)</span>
+                </div>
+
+                <div id="result-status" class="result-badge">未及格</div>
+                
+                <p id="result-summary-text" style="color:var(--text-secondary);"></p>
+
+                <div class="review-section">
+                    <h3 class="review-title">❌ 本次測驗錯題檢討</h3>
+                    <div id="exam-review-list" class="review-list">
+                        <!-- Wrong questions listed here -->
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:15px;width:100%;margin-top:10px;">
+                    <button class="btn" style="flex:1;justify-content:center;" onclick="restartExamSetup()">
+                        🏠 返回測驗首頁
+                    </button>
+                    <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="startExam()">
+                        🔄 再測驗一次
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2026 美光入場安衛訓練輔助系統. 專供承攬商考前複習與準備.</p>
+        <p style="margin-top:5px;">Developed by <a href="#">Antigravity AI</a></p>
+    </footer>
+
+    <!-- EMBEDDED DATABASE -->
+    <script>
+        const questionsData = [
+  {
+    "id": 1,
+    "type": "TF",
+    "question": "使用AED 前須確認傷者意識。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 2,
+    "type": "TF",
+    "question": "使用AED貼上電擊片立刻按下電源開關不須等候語音指示。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 3,
+    "type": "MC",
+    "question": "使用AED第二步驟",
+    "options": [
+      "求救",
+      "確認傷患意識",
+      "進行cpr"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 4,
+    "type": "MC",
+    "question": "使用AED按壓電擊前須。",
+    "options": [
+      "持續CPR",
+      "不要接觸病人, 並避免其他人接觸"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 5,
+    "type": "TF",
+    "question": "Good Catch是美光用來鑑別，提報及解決”安全相關”虛驚事件之系統。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 6,
+    "type": "TF",
+    "question": "FAB現場化學品廢棄物均需依分類放置。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 7,
+    "type": "MC",
+    "question": "FAB 化學品管理一般廢棄物標示顏色。",
+    "options": [
+      "白",
+      "紅",
+      "黃"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 8,
+    "type": "TF",
+    "question": "清潔、PM常使用之化學品分裝後需標示",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 9,
+    "type": "MC",
+    "question": "化學品分裝後須標示",
+    "options": [
+      "名稱",
+      "危害標示",
+      "以上皆是"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 10,
+    "type": "MC",
+    "question": "施工中作業相關許可申請單應。",
+    "options": [
+      "放置作業現場",
+      "由申請人隨身攜帶"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 11,
+    "type": "MC",
+    "question": "進入無塵室作業須。",
+    "options": [
+      "依SOP進行作業並確實穿戴相關防護具",
+      "將識別證佩掛在胸前",
+      "以 上皆是"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 12,
+    "type": "MC",
+    "question": "無塵室內物品暫存,非銅製程區域物品暫存及標示。",
+    "options": [
+      "使用黃黑斑馬紋膠帶",
+      "使用綠色膠帶 作暫存標示"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 13,
+    "type": "MC",
+    "question": "無塵室內物品暫存,銅製程區域物品暫存及標示。",
+    "options": [
+      "使用黃黑斑馬紋膠帶",
+      "使用綠色膠帶作暫 存標示"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 14,
+    "type": "MC",
+    "question": "無塵室內物品暫存, 不必要之可燃物品。",
+    "options": [
+      "使用黃黑斑馬紋膠帶",
+      "使用綠色膠帶作暫存標示",
+      "不可暫存"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 15,
+    "type": "TF",
+    "question": "維修保養作業需確實執行上鎖掛牌制度",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 16,
+    "type": "MC",
+    "question": "F16在哪些地方可以找到AED 設備。",
+    "options": [
+      "O棟四樓醫務室 2 一樓餐廳",
+      "",
+      "CUP棟L20中控室內",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 17,
+    "type": "TF",
+    "question": "無塵室作業人員不可直接坐臥於地板上，需鋪設PVC軟墊",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 18,
+    "type": "TF",
+    "question": "有發塵之虞的物品不可攜帶進入FAB",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 19,
+    "type": "TF",
+    "question": "違反台灣美光安全衛生環保規定時，將依違規行為嚴重性，參考「承攬商稽核條例」與違規嚴重程 度及相對措施，開立『承攬商違規處理單』及註記違規記點點數",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 20,
+    "type": "TF",
+    "question": "承攬商有立即危險之工作場所或違反安全衛生環保規定情節重大者，業務承辦單位及EHS人員有權 要求承攬商立即停工、限期改善或人員驅離出廠等等，待缺失改善後始得復工.",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 21,
+    "type": "TF",
+    "question": "攜帶式電動機具及延長線進入本廠區前，應先完成自主檢查，並至各廠美光驗電站進行檢測。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 22,
+    "type": "TF",
+    "question": "攜帶式電動機具及延長線檢測合格應張貼標籤，有破損應重新檢查。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 23,
+    "type": "TF",
+    "question": "攜帶式電動機具及延長線檢測週期為第1次入廠前、每季最後一個月。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 24,
+    "type": "TF",
+    "question": "上下樓梯應緩步慢行且握扶手。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 25,
+    "type": "TF",
+    "question": "搬重物應搭乘電梯。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 26,
+    "type": "TF",
+    "question": "為了推動節能減碳，雙手拿物品且無法握扶手也應該走樓梯。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 27,
+    "type": "TF",
+    "question": "F16廠內吸菸區位於辦公棟1樓餐廳戶外區域。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 28,
+    "type": "TF",
+    "question": "禁止飲用酒精性飲料及嚼食檳榔。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 29,
+    "type": "TF",
+    "question": "廠內絕對禁止暴力、恐嚇、騷擾等行為。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 30,
+    "type": "TF",
+    "question": "若發現或遭受暴力、恐嚇、騷擾等行為，可尋求台灣美光業務承辦單位、保全、或監控中心協助或撥打合 規熱線。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 31,
+    "type": "TF",
+    "question": "執行設備安裝、維修或拆除前，應通過台灣美光公司『危險能源控制』課程。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 32,
+    "type": "TF",
+    "question": "美光公司所使用的鎖頭要求是紅色鎖頭且只有一隻鑰匙。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 33,
+    "type": "TF",
+    "question": "如果別人有需要，我可以協助拆除他的鎖具及掛牌。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 34,
+    "type": "TF",
+    "question": "作業人員於作業前，應設置作業圍籬並張貼告示牌。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 35,
+    "type": "TF",
+    "question": "非作業人員進入作業圍籬前，則需取得許可及簽名，並禁止随意移動圍籬。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 36,
+    "type": "TF",
+    "question": "所有人員進入圍籬時應至少配戴『安全帽』及『安全眼鏡』。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 37,
+    "type": "TF",
+    "question": "為了使用膠帶方便，無塵室可使用一般黏度膠帶。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 38,
+    "type": "TF",
+    "question": "黃色限台灣美光IE部門Pre-marking 使用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 39,
+    "type": "TF",
+    "question": "紅色為臨時性放樣，如：機台搬入放樣、臨時性標示等。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 40,
+    "type": "TF",
+    "question": "斑馬(黑黃)為半永久性標示，如：暫存區、警示區等；斑馬(紅白)為輻射機台監測區域標示。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 41,
+    "type": "TF",
+    "question": "綠色為銅製程區域的機台、手工具、暫存區等相關標示。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 42,
+    "type": "TF",
+    "question": "暫存區請聯絡所屬對應之台灣美光業務承辦單位工程師協助申請。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 43,
+    "type": "TF",
+    "question": "暫存區請使用3M 低黏度膠帶標示及張貼暫存告示單，並將物品擺放整齊，不可超出暫存區標示。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 44,
+    "type": "TF",
+    "question": "廠內輻射監測區及管制區地面張貼紅白斑馬顏色進行管制，非從事輻射作業人員禁止進入。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 45,
+    "type": "TF",
+    "question": "從事輻射作業人員請確實佩帶輻射劑量佩章，並定期進行佩章計讀。若發現佩章計讀結果異常，請務必與 台灣美光主辦工程師告知。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 46,
+    "type": "TF",
+    "question": "承攬商依法需向勞動檢查機構報備安全衛生工作守則及職業安全衛生組織與人員。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 47,
+    "type": "TF",
+    "question": "承攬商入廠工作前，不須接受台灣美光承攬商環安衛教育訓練。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 48,
+    "type": "TF",
+    "question": "持來賓識別證入廠洽公人員，可以從事施工作業行為。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 49,
+    "type": "TF",
+    "question": "因緊急狀況需入廠緊急搶修作業，需由台灣美光承辦單位提出『緊急入廠作業』申請後，並由承 辦工程師帶領入廠辦理緊急入廠相關程序。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 50,
+    "type": "TF",
+    "question": "承攬商應自行清點及掌握所屬工作人員下班離廠狀況。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 51,
+    "type": "TF",
+    "question": "蝴蝶門僅供人員進出使用，推車等大型拖運設備或大型物品，請由move in口、碼頭區或指定地方 進出。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 52,
+    "type": "TF",
+    "question": "可以幫他人代刷感應卡或借予他人使用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 53,
+    "type": "TF",
+    "question": "門禁卡使用上有問題時，可聯絡製證室。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 54,
+    "type": "TF",
+    "question": "廠內各式車輛進入停車時，應該將車輛熄火並確實將手煞車拉緊。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 55,
+    "type": "MC",
+    "question": "下列何者是台灣美光承攬商?",
+    "options": [
+      "與台灣美光簽訂合約之廠商",
+      "取得台灣美光訂單廠商",
+      "其 他工程施工之廠商",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 56,
+    "type": "MC",
+    "question": "美光承攬商環安衛入廠教育訓練有效期限為幾年?",
+    "options": [
+      "3個月",
+      "6個月",
+      "1年",
+      "2年"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 57,
+    "type": "MC",
+    "question": "下列何者為進出廠刷證時，該注意之事項?",
+    "options": [
+      "進出廠區時，應刷證感應",
+      "工作人員應自行確認螢幕個人資料是否正確並配合保全檢查，避免造成刷證異常或離廠未刷證",
+      "承攬商刷證感應時，勿將台灣美光工作證與他廠磁卡或其他感應卡片",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 58,
+    "type": "MC",
+    "question": "進出廠區刷卡時，顯示藍色表示?",
+    "options": [
+      "正常",
+      "無權限",
+      "刷卡過久"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 59,
+    "type": "MC",
+    "question": "進出廠區刷卡時，顯示紅色表示?",
+    "options": [
+      "正常",
+      "無權限",
+      "刷卡過久"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 60,
+    "type": "MC",
+    "question": "進出廠區刷卡時，顯示綠色表示?",
+    "options": [
+      "正常",
+      "無權限",
+      "刷卡過久"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 61,
+    "type": "MC",
+    "question": "A. 通過感應門 B. 進入蝴蝶門 C. 等待感應門開啟 D. 將識別證放置感應器上方，正確的刷卡步驟為下 列何者?",
+    "options": [
+      "ABCD /",
+      "BDCA /",
+      "DBCA /",
+      "BDAC"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 62,
+    "type": "MC",
+    "question": "廠內室外道路速限為多少?",
+    "options": [
+      "20 km/hr.",
+      "25 km/hr.",
+      "30 km/hr."
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 63,
+    "type": "MC",
+    "question": "下列何者為美光無塵室所管制的通訊設備?",
+    "options": [
+      "隨身碟",
+      "電腦",
+      "照相手機",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 64,
+    "type": "TF",
+    "question": "承攬商所有作業皆需訂定工作危害分析(JOB HAZARD ANALYSIS)",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 65,
+    "type": "MC",
+    "question": "施工告示牌需放置下列哪些東西",
+    "options": [
+      "作業許可單",
+      "工作危害分析",
+      "每日工具箱會議記錄",
+      "以上皆需"
+    ],
+    "ans": "要"
+  },
+  {
+    "id": 66,
+    "type": "TF",
+    "question": "工作現場如有特殊作業，則需放置相關特殊作業相關法令證照",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 67,
+    "type": "TF",
+    "question": "進入美光TW管制區域至少要夥同作業並於作業前提出申請",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 68,
+    "type": "TF",
+    "question": "電器機具進入美光廠區需進行檢查後才可入廠",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 69,
+    "type": "TF",
+    "question": "美光廠區禁止任何活線作業，如有必要，需提出並與美光承辦人員討論",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 70,
+    "type": "TF",
+    "question": "露天開挖作業之工作場所，應設有警告標示，禁止與工作無關人員進入，作業之風險評估結果、 地下管線流體審視情形、擋土支撐或斜撐材料識別結果需交予美光相關人員審視",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 71,
+    "type": "TF",
+    "question": "搬運作業安全-大型物件(重量大於等於100公斤且垂直高度1.5公尺以上)，至少需要3人作業 (2名搬 運+ 1名現場管理與監督)，使用相關搬運用機械器具，提送相關之搬運計畫，並經EHS審查合格",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 72,
+    "type": "TF",
+    "question": "搬運作業安全-所有人員進行物料搬運時須穿著安全鞋、工作手套、安全帽",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 73,
+    "type": "TF",
+    "question": "於廠內操作堆高機需夥同作業，且需指定運送路線",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 74,
+    "type": "TF",
+    "question": "人員於FAB內工作，高架作業時需注意自動化搬運系統，避免碰撞受傷",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 75,
+    "type": "TF",
+    "question": "人員於FAB內工作，高架作業於自動化搬運系統附近時，需申請OHT管制",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 76,
+    "type": "TF",
+    "question": "FAB內自動化搬運系統，需保持鄰近及OHT底部淨空",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 77,
+    "type": "TF",
+    "question": "人員於FAB內工作，累了可以倚靠機台裝卸口",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 78,
+    "type": "TF",
+    "question": "在FAB內，上方軌道載運晶舟盒的機械(OHT)，跟我作業無關，無須理會它",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 79,
+    "type": "TF",
+    "question": "廠內堆高機使用前須檢查各項安全措施(聲響、燈光)",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 80,
+    "type": "TF",
+    "question": "搬運作業規範-採用油壓板車搬運、進入電梯時之縫隙應先使用鐵板消彌縫隙，避免危險發生",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 81,
+    "type": "TF",
+    "question": "搬運作業規範-搬運東西依照自己體力負荷就可以搬運，無須理會要求",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 82,
+    "type": "MC",
+    "question": "下列何者是美光廠區明定之管制區域(進出需提出申請)?",
+    "options": [
+      "管道間、Ceiling區",
+      "逃生梯、管溝",
+      "氣體化學品儲存室",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 83,
+    "type": "MC",
+    "question": "開挖作業-垂直開挖深度達_____公尺以上者，應指定露天開挖作業主管。",
+    "options": [
+      "3",
+      "2",
+      "1.5"
+    ],
+    "ans": ")"
+  },
+  {
+    "id": 84,
+    "type": "MC",
+    "question": "搬運作業規範-重量20公斤以上，或高度 1.5公尺以上，或長度3公尺以上之物件(如PARTS)需要__人 搬運，且符合廠內規範。",
+    "options": [
+      "1",
+      "2"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 85,
+    "type": "MC",
+    "question": "搬運作業前需",
+    "options": [
+      "兩人以上搬運須有圍籬管制。",
+      "物品堆疊不可超過1.5m, 避免阻擋搬運作業人員視線。",
+      "搬運/推動前務必事先排除搬運通道上的障礙物。",
+      "物件搬運阻礙視線，現場需設有專責監督人員指揮管制。",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 86,
+    "type": "MC",
+    "question": "於無負載情形下操作堆高機，車速不可超過__公里",
+    "options": [
+      "10",
+      "15",
+      "20",
+      "25"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 87,
+    "type": "TF",
+    "question": "作業前，承攬商需將作業許可單放置於施工現場",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 88,
+    "type": "TF",
+    "question": "若作業許可單更換廠商、變更作業區域或作業內容，應請台灣美光業務承辦單位重新申請作業許 可單",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 89,
+    "type": "TF",
+    "question": "進行明火作業、吊掛作業、高架作業、局限空間作業、TMAH拆管作業皆屬於特殊作業，作業前須 申請特殊作業許可",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 90,
+    "type": "TF",
+    "question": "進行吊掛作業不需要申請特殊作業許可就可以施工",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 91,
+    "type": "MC",
+    "question": "作業前，應完成哪些項目?",
+    "options": [
+      "工作危害分析",
+      "作業許可申請",
+      "工具箱會議",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 92,
+    "type": "TF",
+    "question": "當日作業前，承攬商應依特殊作業檢查表先執行作業前自主檢查，再通知台灣美光業務承辦人員 檢查及EHS人員進行複查，始可進行作業",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 93,
+    "type": "TF",
+    "question": "動火作業不需設置滅火器",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 94,
+    "type": "TF",
+    "question": "動火作業如作業有可能造成火警警報系統作動者，請事先完成消防系統中斷隔離",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 95,
+    "type": "TF",
+    "question": "進行吊掛作業前，需提供吊掛作業防護計畫並完成審核後才可施工",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 96,
+    "type": "TF",
+    "question": "吊掛作業若遇到強風、大雨、大雪等惡劣氣候下，勞工作業有發生危險之虞時，應立即禁止工作",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 97,
+    "type": "TF",
+    "question": "執行吊掛作業時，需設置警示圍籬與人員進出管制",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 98,
+    "type": "TF",
+    "question": "防墜母索應與吊籠之吊索固定於不同處",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 99,
+    "type": "TF",
+    "question": "吊籠開關需要裝設漏電斷路器",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 100,
+    "type": "MC",
+    "question": "執行吊掛作業需符合下列事項?",
+    "options": [
+      "需確認起重機合格證、操作手及吊掛手合格證",
+      "吊掛物不得 超過額定荷重",
+      "檢查過捲揚預防裝置及吊鉤防止脫落裝置",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 101,
+    "type": "TF",
+    "question": "現場負責人(監工)之職責與工安人員的職責是相同的",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 102,
+    "type": "TF",
+    "question": "使用廠內設置的呼吸用空氣供應系統前，應先通過美光承辦所提供的教育訓練，並留存訓練紀錄始可使用",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 103,
+    "type": "TF",
+    "question": "因故均無法與會時，需請台灣美光業務承辦人員出席會議；會議後再向台灣美光業務承辦人員瞭 解會議重點",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 104,
+    "type": "TF",
+    "question": "因故均無法與會時，承攬商須事先請假，無須經Micron承辦人員同意，即可不用出席會議。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 105,
+    "type": "TF",
+    "question": "主承攬商之現場(工程/專案)負責人、工安人員每月參加台灣美光召開承攬商環安衛溝通會議，並 將會議重點轉達所屬工作人員瞭解及配合遵守",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 106,
+    "type": "TF",
+    "question": "主承攬商之現場(工程/專案)負責人、工安人員每季需參加台灣美光召開承攬商環安衛溝通會議",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 107,
+    "type": "TF",
+    "question": "主承攬商之現場(工程/專案)負責人、工安人員每年需參加台灣美光召開承攬商環安衛溝通會議",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 108,
+    "type": "MC",
+    "question": "主承攬商之現場(工程/專案)負責人、工安人員多久需參加台灣美光召開承攬商環安衛溝通會議?",
+    "options": [
+      "每月",
+      "每季",
+      "每半年",
+      "每年"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 109,
+    "type": "TF",
+    "question": "督導現場工作之安全衛生、環境維護、品質及進度等事項是現場負責人(監工)職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 110,
+    "type": "TF",
+    "question": "擔任台灣美光與承攬商間之溝通窗口是現場負責人(監工)職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 111,
+    "type": "TF",
+    "question": "了解工作環境及潛在危險因素，並與台灣美光承辦人員及EHS配合及討論是現場負責人(監工)職 責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 112,
+    "type": "TF",
+    "question": "督導現場工作之安全衛生、環境維護、品質及進度等事項是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 113,
+    "type": "TF",
+    "question": "擔任台灣美光與承攬商間之溝通窗口是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 114,
+    "type": "TF",
+    "question": "了解工作環境及潛在危險因素，並與台灣美光承辦人員及EHS配合及討論是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 115,
+    "type": "TF",
+    "question": "擬訂、規劃及推動安全衛生管理事項是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 116,
+    "type": "TF",
+    "question": "提升工作人員之安全衛生及環保意識是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 117,
+    "type": "TF",
+    "question": "督導其機械設備、工具之安全檢查及工作人員之作業安全是工安人員職責。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 118,
+    "type": "TF",
+    "question": "每日施工作業前，承攬商現場負責人(監工)或工安人員應召開工具箱會議",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 119,
+    "type": "MC",
+    "question": "台灣美光廠區作業人員需遵守環安衛行為規範第一條是?",
+    "options": [
+      "行為第一",
+      "品質第一",
+      "工作第一",
+      "安全第一"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 120,
+    "type": "TF",
+    "question": "承攬商自動檢查記錄應保存一年。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 121,
+    "type": "MC",
+    "question": "承攬商自動檢查記錄應保存幾年?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 122,
+    "type": "TF",
+    "question": "施工有涉及CoHE上鎖掛牌、機台安全與除役、帶電和暴露的電氣作業、TMAH作業時，施工人員須 接受美光安全訓練通識課，取得合格貼紙，並張貼於施工安全小卡上。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 123,
+    "type": "TF",
+    "question": "避難燈具插座需要用電時可以使用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 124,
+    "type": "TF",
+    "question": "如有緊急情況，可以使用廠內滅火器。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 125,
+    "type": "TF",
+    "question": "作業時及進入作業區域不用配戴安全眼鏡。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 126,
+    "type": "TF",
+    "question": "當發生化學品接觸，應立即通報保健中心/應變中心，並就近尋找沖身洗眼器大量沖水15分鐘",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 127,
+    "type": "TF",
+    "question": "當我接觸到氫氟酸，可以使用六氟靈作為解毒劑",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 128,
+    "type": "TF",
+    "question": "當我接觸到氫氟酸以外的其他酸、鹼性的化學品可以使用敵腐靈作為解毒劑",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 129,
+    "type": "TF",
+    "question": "我可以將廢液倒入沖身洗眼器，並堵住出入口",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 130,
+    "type": "TF",
+    "question": "GHS危害標示包含圖示、名稱、危害成分、危害警告訊息、危害防範措施、製造商及供應商資料",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 131,
+    "type": "TF",
+    "question": "在無塵室我若要查詢SDS，可尋求主辦工程師協助使用電腦在網址列打SDS後搜尋所需要的資訊",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 132,
+    "type": "TF",
+    "question": "若我要攜帶化學品進廠，需經過美光主辦工程師與美光EHS同意",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 133,
+    "type": "TF",
+    "question": "若我要攜帶化學品進廠，需要準備SDS並確保容器上有GHS標示",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 134,
+    "type": "TF",
+    "question": "若廠商需將化學品暫存於美光，儲存期間最長為三個月",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 135,
+    "type": "TF",
+    "question": "若廠商需在廠內進行有機溶劑或是特定化學物質之操作，需有作業主管於作業現場監督",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 136,
+    "type": "TF",
+    "question": "作業期間需穿著、配戴適當的防護具，並遵守美光規範",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 137,
+    "type": "TF",
+    "question": "搬運化學品需使用適當的工具，搬運兩瓶以上即需使用搬運工具",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 138,
+    "type": "MC",
+    "question": "化學品暫存區域規定何者正確?",
+    "options": [
+      "安全資料表",
+      "高壓鋼瓶僅限存放惰性氣體",
+      "液態化學 品需設置承液盤，不允許存放有機溶劑",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 139,
+    "type": "MC",
+    "question": "槽車灌裝安全規定何者正確?",
+    "options": [
+      "車輛入廠定位後，應熄火並加前後輪檔",
+      "作業人員應依照作業 SOP穿戴防護具、並架設完整圍籬進行人員進出管制",
+      "與業主依照點檢表完成作業前安全檢查後， 始可作業",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 140,
+    "type": "TF",
+    "question": "廠區內標有橘黑色斑馬膠帶之區域、或貼有橘底黑字警告標示之設備，為使用TMAH之高風險區域",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 141,
+    "type": "TF",
+    "question": "從事可能接觸TMAH作業之承攬商人員，應於作業前接受由業主講授之TMAH安全教育訓練，並通 過測驗取得訓練貼紙，張貼於識別證",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 142,
+    "type": "TF",
+    "question": "所有工作人員應仔細閱讀風險評估及SOP，並遵守所有一般安全規定",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 143,
+    "type": "TF",
+    "question": "TMAH管路拆裝作業納入特殊作業申請，請於作業前申請許可、並通知ERC完成安全檢查後始可作 業",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 144,
+    "type": "MC",
+    "question": "在無塵室內可能接觸到TMAH的單位有哪些?",
+    "options": [
+      "PHOTO",
+      "WET",
+      "CMP",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 145,
+    "type": "TF",
+    "question": "盛裝化學品的容器、儲存櫃、機台需張貼GHS危害標示",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 146,
+    "type": "TF",
+    "question": "禁止攜帶未經申報、或超過法令限制量之化學品",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 147,
+    "type": "TF",
+    "question": "使用化學品時，應依化學品特性配適當防護具，如全罩式護目鏡、化學防護手套等",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 148,
+    "type": "TF",
+    "question": "未完成訓練並取得貼紙之工作人員，禁止從事可能接觸TMAH之任何作業",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 149,
+    "type": "TF",
+    "question": "可能接觸TMAH之作業，皆需完成風險評估或工作安全分析",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 150,
+    "type": "MC",
+    "question": "美光EHS對承攬商和供應商期望？",
+    "options": [
+      "符合或超過美光既有的EHS準則及程序要求",
+      "遵守當地的法 規要求或美光所列的要求",
+      "當地法規及美光規定的要求取其嚴格要求遵守",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 151,
+    "type": "MC",
+    "question": "承攬商或供應商若是不遵守美光EHS要求或當地法規要求可能導致 ？",
+    "options": [
+      "不會受到影響",
+      "僅口頭勸 導",
+      "從設施或經批准的名單中移除",
+      "給予獎勵"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 152,
+    "type": "MC",
+    "question": "承攬商和供應商在美光從事的所有工作及活動作業之前，應制定？",
+    "options": [
+      "失誤樹分析",
+      "工作危 害分析",
+      "失效模式與影響分析",
+      "危害與可操作性分析"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 153,
+    "type": "MC",
+    "question": "請問何時需要確認安全和環境預防措施的合規性？",
+    "options": [
+      "開始工作前",
+      "工作期間",
+      "工作結束後",
+      "無 須確"
+    ],
+    "ans": "認"
+  },
+  {
+    "id": 154,
+    "type": "MC",
+    "question": "請問所有在美光廠內的合約商及承攬商員工如有涉及環安衛或製程安全相關事故時，何時需將此 事故的有關資訊通報給他們公司的駐廠代表、美光監工及美光的廠區EHS？",
+    "options": [
+      "立即",
+      "1天內",
+      "3天 內",
+      "7天"
+    ],
+    "ans": "內"
+  },
+  {
+    "id": 155,
+    "type": "MC",
+    "question": "請問所有在美光廠內的合約商及承攬商員工如有涉及環安衛或製程安全相關事故時，何種事故需 將此事故的有關資訊通報給他們公司的駐廠代表、美光監工及美光的廠區EHS？",
+    "options": [
+      "虛驚事件",
+      "人 員受傷",
+      "環境事件",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 156,
+    "type": "MC",
+    "question": "請問依照事業廢棄物可分類為哪些？",
+    "options": [
+      "一般事業廢棄物",
+      "有害事業廢棄物",
+      "可資源回收再利用廢棄物",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 157,
+    "type": "MC",
+    "question": "請問有害事業廢棄物主要由哪個政府單位管理？",
+    "options": [
+      "職安署",
+      "環保署",
+      "衛福部",
+      "經濟部"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 158,
+    "type": "MC",
+    "question": "請問依台灣美光廢棄物儲存管理規定應遵守？",
+    "options": [
+      "廢棄物及資源回收物統一由台灣美光依法清理",
+      "承攬商需將廢棄物及資源回收物分類完全，並由承攬商搬運至廢棄物倉庫依分類擺放整齊",
+      "大量 產出廢棄物時，需與EHS廢棄物業務承辦同仁聯繫",
+      "以上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 159,
+    "type": "MC",
+    "question": "請問若承攬商未將廢棄物分類完全或未依分類要求擺放台灣美光EHS將會？",
+    "options": [
+      "依承攬商安全衛生 環保規章之罰則辦理",
+      "置之不理",
+      "僅口頭警告",
+      "給予獎勵"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 160,
+    "type": "MC",
+    "question": "請問下列何者為正確廢液處置方式？",
+    "options": [
+      "標示為「化學品容器內溶液皆不可傾倒」",
+      "傾倒任何液 體於廠內溝渠、管路前，必須事先通知EHS",
+      "任何溶液皆不可排放於雨水溝",
+      "以 上皆"
+    ],
+    "ans": "是"
+  },
+  {
+    "id": 161,
+    "type": "MC",
+    "question": "請問若有現場洩漏事件應通報哪個單位？",
+    "options": [
+      "EHS",
+      "設備",
+      "廠務",
+      "保全單位"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 162,
+    "type": "TF",
+    "question": "雨水溝除了與雨水外不可排入任何廢液？",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 163,
+    "type": "TF",
+    "question": "台灣美光有針對一般事業廢棄物、有害事業廢棄物和資源回收物規劃貯存區域？",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 164,
+    "type": "TF",
+    "question": "承攬商和供應商應執行開始作業前和定期的訓練，以確保所有員工理解和執行JHA / RA的內容？",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 165,
+    "type": "TF",
+    "question": "所有事故與傷害事件應立即通報",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 166,
+    "type": "TF",
+    "question": "在未經允許的情況下，可以略過安全聯鎖裝置或控制",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 167,
+    "type": "TF",
+    "question": "「停止工作政策｣是授予在其設施工作的所有員工，承攬商和供應商的權力和責任，停止對任何人造成立即 危險的工作或行為、可能對環境造成的損害或違反法規規定",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 168,
+    "type": "TF",
+    "question": "集合注意事項:應迅速至定位點進行排列",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 169,
+    "type": "TF",
+    "question": "集合注意事項:確認同仁是否到齊，並向主辦工程師回報人數",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 170,
+    "type": "TF",
+    "question": "FAB16的集結點一處在1號哨後方",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 171,
+    "type": "TF",
+    "question": "FAB16的集結點一處在2號哨後方",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 172,
+    "type": "TF",
+    "question": "美光承諾保護所有員工，承攬商，供應商和訪客的安全和健康，及在其設施環境的作業安全",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 173,
+    "type": "TF",
+    "question": "全球安全規則包含「找出、控制並通報不安全的狀態與行為 (Good Catch)｣",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 174,
+    "type": "TF",
+    "question": "安全與工作品質相關性不高",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 175,
+    "type": "TF",
+    "question": "遵循程序，訓練並穿戴必須之個人防護具是行為安全規則",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 176,
+    "type": "TF",
+    "question": "所有事故與傷害事件不須立即通報",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 177,
+    "type": "MC",
+    "question": "依據美光的環安衛政策，下列哪些對象要共同幫助識別、消除和控管EHS(環境、健康、安全)相關 的危害和風險?",
+    "options": [
+      "承攬商",
+      "員工",
+      "公司管理層",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 178,
+    "type": "MC",
+    "question": "關於美光「安全行動8大準則｣，下列何者為非?",
+    "options": [
+      "安全是首要任務",
+      "所有傷害未必都可以被預防",
+      "全員參與是必要的",
+      "所有傷害都可以被預防"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 179,
+    "type": "MC",
+    "question": "關於美光「安全行動8大準則｣，下列何者為非?",
+    "options": [
+      "每個人需互相關心",
+      "安全地工作是工作的一個 條件",
+      "預防傷害是好的行為",
+      "沒有必要全員參與"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 180,
+    "type": "MC",
+    "question": "關於美光商業行為與道德準則須謹記那些規則?",
+    "options": [
+      "了解關於您所作業的相關規範及公司準則",
+      "務必遵守相關準則",
+      "做決定前確認決定是否合法是否是對的",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 181,
+    "type": "MC",
+    "question": "緊急事故通報要項包含?",
+    "options": [
+      "人",
+      "地",
+      "時",
+      "事",
+      "以上皆是"
+    ],
+    "ans": "5"
+  },
+  {
+    "id": 182,
+    "type": "MC",
+    "question": "緊急通報專線 04-2576-2119，各廠轉接代碼何者正確?",
+    "options": [
+      "F11轉 1 ; F16/O3/W5轉 3 ; MTB/AATT/O4轉 2 ; MMTN轉 3",
+      "F11轉 1 ; F16/O3/W5轉 2 ; MTB/AATT/O4轉 3 ; MMTN轉 4",
+      "F11轉 3 ; F16/O3/W5轉 1 ; MTB/AATT/O4轉 2 ; MMTN轉"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 183,
+    "type": "MC",
+    "question": "保健中心服務專線 04-2576-5119，各廠轉接代碼何者正確?",
+    "options": [
+      "F11轉 1 ; F16 A1/A2轉 2 ；F16 A3轉 3 ；AATT轉 4 ；MTB轉 5；MMTN轉 6；O3/W5轉 8；O4轉 7",
+      "F11轉 5 ; F16 A1/A2轉 1 ；F16 A3轉 2 ；AATT轉 6 ；MTB轉 4；MMTN轉 7；O3/W5轉 3；O4轉 8",
+      "F11轉 1 ; F16 A1/A2轉 2 ；F16 A3轉 2 ；AATT轉 5 ；MTB轉 3；MMTN轉 6；O3/W5轉 7；O4轉"
+    ],
+    "ans": "8"
+  },
+  {
+    "id": 184,
+    "type": "MC",
+    "question": "當發生什麼狀況時，監控中心會依照異常嚴重情況下達疏散指令?",
+    "options": [
+      "火災",
+      "地震",
+      "其他異常",
+      "以上皆是。"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 185,
+    "type": "MC",
+    "question": "自動體外心臟電擊去顫器簡稱?",
+    "options": [
+      "AEO",
+      "ABS",
+      "AED",
+      "EHS"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 186,
+    "type": "TF",
+    "question": "承攬商不必配合參與演練，來熟悉廠區緊急避難動線及疏散集結位置。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 187,
+    "type": "TF",
+    "question": "當需要疏散時，需遵從廣播指示移動。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 188,
+    "type": "MC",
+    "question": "異常事故不包含?",
+    "options": [
+      "氣體洩漏",
+      "火警",
+      "天氣起霧",
+      "電梯受困"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 189,
+    "type": "TF",
+    "question": "高架作業是指工作人員立足點至地板或地面間之垂直距離在1.8公尺以上之作業。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 190,
+    "type": "TF",
+    "question": "施工人員不得立於梯頂作業，禁止2人以上(含2人)於同一座A字梯上作業。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 191,
+    "type": "TF",
+    "question": "使用高空工作車時，作業人員應具備高空作業車操作員證照；但監視者不用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 192,
+    "type": "TF",
+    "question": "不論施工架高度，組配及拆除作業時，承攬商應指派施工架組配作業主管於作業現場進行作業前 後檢點",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 193,
+    "type": "TF",
+    "question": "檢查不合格、安裝中、修改中、拆除中之施工架應張貼紅色掛牌來警告人員請勿使用，並恰當地 加以固定。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 194,
+    "type": "TF",
+    "question": "嚴禁人員任意掀開盲板，若因施作需要掀開盲板，應事先取得台灣美光同意，並設置警示圍籬隔 離施作區域。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 195,
+    "type": "TF",
+    "question": "承攬商如需開啟高架地板或開孔時，除需申請”高架作業許可表”等相關表單並張貼於現場外，還需 於現場設置相關安全防護。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 196,
+    "type": "TF",
+    "question": "為防止局限空間場所之缺氧危險，承攬商應準備空氣呼吸器、氧氣呼吸器、輸氣管面罩、梯子、 繩索、防墜器、救援三角架等緊急事故用器具設備",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 197,
+    "type": "TF",
+    "question": "嚴禁飲酒、化妝（如塗口紅、眼影、擦粉、擦指甲）人員進入無塵室。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 198,
+    "type": "TF",
+    "question": "穿戴髮罩時需注意不可將頭髮露出,戴上頭罩後,應調整頭套後方束帶及口罩不使嘴巴與鼻子露出,穿 無塵衣應將無塵帽頸部以下塞入無塵衣內。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 199,
+    "type": "TF",
+    "question": "無塵室內使用吸塵器,嚴禁使用於處理化學藥品、特殊氣體、管路漏水等。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 200,
+    "type": "TF",
+    "question": "機台進入無塵室前需在move-in口拆除所有包裝並擦拭乾淨避免汙染環境。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 201,
+    "type": "TF",
+    "question": "所有進出人員（含VIP、廠商、員工），得接受本公司授權之無塵室管理單位人員對攜出入物品之 檢查及著裝指導。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 202,
+    "type": "TF",
+    "question": "進入靜電防護區需不一定要配戴Nitrile。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 203,
+    "type": "TF",
+    "question": "非緊急事故不可以由安全門進出。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 204,
+    "type": "TF",
+    "question": "一般紙張、紙板、皮革、手帕等易發塵物品禁止攜入無塵室內。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 205,
+    "type": "TF",
+    "question": "工具、物品攜入前必須於更衣室入口,以無塵布搭配去離子水擦拭表面後方能進入",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 206,
+    "type": "TF",
+    "question": "除一般區域，靜電防護區和銅製程區均有門禁管理。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 207,
+    "type": "TF",
+    "question": "於洗手機洗淨雙手需確實烘乾，不得將洗手水隨意甩在地面。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 208,
+    "type": "TF",
+    "question": "對於會影響潔淨度之施工,如無塵室鑽孔、開洞時需事先申請做隔絕防護,並於施工時用無塵室專用 吸塵器邊鑽邊吸。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 209,
+    "type": "TF",
+    "question": "銅製品或黃銅製品(例如黃銅鎖頭)不可於無塵室中使用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 210,
+    "type": "TF",
+    "question": "進入銅製程區域內必須戴藍色Nitrile手套及無塵鞋套。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 211,
+    "type": "TF",
+    "question": "人員離開銅製程區域外必須脫掉藍色Nitrile手套及無塵鞋套 。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 212,
+    "type": "TF",
+    "question": "銅製程機台所有工具及消耗品，必須限制在銅製程區域內使用。禁止將銅製程區域工具，放置或 使用於非銅製程之生產區域。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 213,
+    "type": "TF",
+    "question": "銅區域專用的工具必須貼綠色標籤標示，以避免與非銅製程區域混用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 214,
+    "type": "TF",
+    "question": "銅區內的機台、零件及工具箱不能與非銅區混用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 215,
+    "type": "TF",
+    "question": "在銅區使用完畢的擦機布，必須立即丟棄勿重複使用。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 216,
+    "type": "TF",
+    "question": "RBA全名是 Responsible Business Alliance",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 217,
+    "type": "TF",
+    "question": "RBA 行為準則的標準用以確保電子業與其供應鏈廠商所提供的工作條件是安全的、勞工受到尊 重、有尊嚴，且各廠商之業務營運具環保責任並以合乎道德的方式經營。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 218,
+    "type": "MC",
+    "question": "下列哪項道德規範標準，規定企業不得許諾、提供、授權、給予或收受賄賂或其他方式獲取的不 當或不正當利益。",
+    "options": [
+      "資訊公開",
+      "知識產權",
+      "公平交易、廣告和競爭",
+      "無不正當收益"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 219,
+    "type": "MC",
+    "question": "下面哪些標準不屬於RBA 行為準則中道德規範方面的標準?",
+    "options": [
+      "持續改善",
+      "身份保護及防止報復",
+      "負責 任地採購礦物",
+      "誠信經營",
+      "無不正當收益"
+    ],
+    "ans": "1"
+  },
+  {
+    "id": 220,
+    "type": "MC",
+    "question": "下面哪些標準不屬於RBA 行為準則中健康與安全方面的標準?",
+    "options": [
+      "職業安全",
+      "有害物質",
+      "工傷和職業病",
+      "工業衛生",
+      "機器防護"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 221,
+    "type": "MC",
+    "question": "下面哪些標準不屬於RBA 行為準則中環境方面的標準?",
+    "options": [
+      "有害物質",
+      "環境許可和報告",
+      "預防污染和節 約資源",
+      "負責任地採購礦物",
+      "廢氣排放"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 222,
+    "type": "MC",
+    "question": "下面哪些標準不屬於RBA 行為準則中勞工方面的標準?",
+    "options": [
+      "自由選擇職業",
+      "青年勞工",
+      "工時",
+      "工資與 福利",
+      "水資源管理"
+    ],
+    "ans": "5"
+  },
+  {
+    "id": 223,
+    "type": "MC",
+    "question": "RBA行為準則中，對於人道的待遇以下何者正確?",
+    "options": [
+      "禁止騷擾（包括性騷擾）或虐待、體罰、身心理迫 害、口頭虐待或恐嚇",
+      "提供人道的工作條件，並且公平地對待員工",
+      "記錄紀律處分，須與程序一致並且 交由管理階層審查",
+      "以上皆正"
+    ],
+    "ans": "確"
+  },
+  {
+    "id": 224,
+    "type": "MC",
+    "question": "RBA行為準則中，沒有為以下哪些方面設置標準",
+    "options": [
+      "勞工",
+      "道德規範",
+      "環境",
+      "品質保證",
+      "健康與 安全"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 225,
+    "type": "MC",
+    "question": "RBA行為準則中，資訊公開是指",
+    "options": [
+      "應當按照適用法規和普遍的行業慣例公開有關參與勞工、健康與安 全、環境作法、商業活動、架構、財務狀況和業績的資訊",
+      "不得偽造記錄或不實陳述供應鏈的狀況或做 法",
+      "以上皆正"
+    ],
+    "ans": "確"
+  },
+  {
+    "id": 226,
+    "type": "MC",
+    "question": "以下無塵服「脫」衣流程何者正確?",
+    "options": [
+      "[FE要求]脫PVC手套丟垃圾桶→「洗手/烘乾」→髒污/破損自檢 →脫「無塵鞋」並擺放至鞋櫃​→ 用一隻手抓住袖子再脫下無塵衣避免袖口碰地→ 脫「無塵帽」→將帽夾在內側拉鍊及領口定位並 自檢是否髒污/破損→脫髮帽及口罩並投入垃圾桶​",
+      "[BE封裝產線要求]取下手套​→脫掉無塵鞋並放置於鞋櫃→脫掉無塵服, 避免衣袖接觸地面→脫掉 無塵帽​→取下網帽→拿掉口罩→將取下之網帽、口罩、手套丟棄垃圾桶",
+      "以上皆正"
+    ],
+    "ans": "確"
+  },
+  {
+    "id": 227,
+    "type": "MC",
+    "question": "以下無塵服「穿」衣流程何者正確？",
+    "options": [
+      "[FE要求]「洗手/烘乾」→戴髮帽、口罩​→髒污/破損自檢​→戴無塵頭套→用一隻手抓住袖子再穿上無塵衣 避免袖口碰地→穿無塵鞋​→照鏡自檢髒污/破損→戴安全帽",
+      "[BE封裝產線要求]戴口罩→戴髮帽​→戴無塵帽​→穿無塵服,套入腳部時避免衣袖接觸到地面，再套入雙臂 ，頭套套入無塵服內並拉拉鍊至領口定位→穿無塵鞋並拉拉鍊至定位​→戴手套→照鏡自檢髒污/破損→至洗 手機洗手並烘乾​",
+      "以上皆正"
+    ],
+    "ans": "確"
+  },
+  {
+    "id": 228,
+    "type": "MC",
+    "question": "關於無塵室中的飲水機，以下哪項陳述是正確的？",
+    "options": [
+      "不能在無塵室中設置飲水機。",
+      "飲水機應與生產設 備保持一定距離。",
+      "可以遠離飲水機喝水"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 229,
+    "type": "MC",
+    "question": "關於潔淨室環境中的電子設備，以下哪個陳述不正確 ?",
+    "options": [
+      "允許於無塵室中使用Security 許可的3C裝置。",
+      "允 許使用無塵室許可的外殼。",
+      "進入潔淨室之前，不必擦除電子設備。"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 230,
+    "type": "MC",
+    "question": "無塵室工作下列何者為錯誤？",
+    "options": [
+      "頭髮、鬍鬚或鬍鬚、鼻子、耳朵、嘴巴必須始終被遮蓋",
+      "不可在無塵室吃 東西",
+      "手套可以不用塞於袖下"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 231,
+    "type": "MC",
+    "question": "更衣室無塵服放置櫃內，只能放置何種物品？",
+    "options": [
+      "私人外套、毛、背心",
+      "無塵衣物",
+      "無塵 筆記本、筆、擦手乳液、水"
+    ],
+    "ans": "2"
+  },
+  {
+    "id": 232,
+    "type": "MC",
+    "question": "下列何者為正確？",
+    "options": [
+      "不須遵從FAB規範進行作業",
+      "機台上可隨意擺放物品",
+      "無塵服可碰觸地板並 隨意盤坐機台上",
+      "若使用非無塵紙則須護貝或放在合格的塑膠套中。"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 233,
+    "type": "MC",
+    "question": "無塵室作業下列何者為正確？",
+    "options": [
+      "在無塵室內不可睡覺",
+      "手套上不可寫字",
+      "進入無塵室需全程配戴 安全眼鏡",
+      "以上皆是"
+    ],
+    "ans": "4"
+  },
+  {
+    "id": 234,
+    "type": "MC",
+    "question": "物料檢測的敘述者為非?",
+    "options": [
+      "物料共分為3類",
+      "會與wafer或機台內接觸, 或是溫度高於40℃者屬於固 體B類",
+      "若要在無塵室內使用化學品, 應該都須進行液體檢"
+    ],
+    "ans": "測"
+  },
+  {
+    "id": 235,
+    "type": "TF",
+    "question": "無塵室的物品不能有發塵和AMC的污染，若有相關疑慮則禁止攜入。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 236,
+    "type": "TF",
+    "question": "離開無塵室銅區時，需以10% 酒精擦拭被帶出銅區的物品",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 237,
+    "type": "TF",
+    "question": "穿著髮帽時，不需將頭髮完全包覆",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 238,
+    "type": "TF",
+    "question": "工具、物品攜入前必須於更衣室入口以水擦拭清潔",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 239,
+    "type": "TF",
+    "question": "為了趕快進入FAB工作，可以在無塵室內奔跑",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 240,
+    "type": "TF",
+    "question": "進入無塵室的物品應由CC允許進入，進入EPA區的物品應另具ESD防護功能。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 241,
+    "type": "TF",
+    "question": "無塵衣使用完畢掛好後，應將拉鍊拉上，並把魔術貼貼好。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 242,
+    "type": "TF",
+    "question": "於洗手機洗淨雙手並烘乾，不得將洗手水隨意甩在地面，避免人員踩踏滑倒。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 243,
+    "type": "TF",
+    "question": "無塵室工作區內禁止化妝，已化妝者需經卸妝後才可進入更衣室。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 244,
+    "type": "TF",
+    "question": "穿無塵衣時，為了好穿，可暫時坐在地板上。脫衣服時，應先脫頭套，再脫無塵衣。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 245,
+    "type": "TF",
+    "question": "進入銅區域前須套上鞋套且於原PVC手套外再戴Nitrile手套，並確保手套有完整覆蓋，再進入銅製 程區域。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 246,
+    "type": "MC",
+    "question": "Live Safe 傳達的觀念是甚麼?",
+    "options": [
+      "安全回家是我的責任",
+      "把安全內化成自己的DNA，像呼吸一樣自然",
+      "別當旁觀者",
+      "停止工作的權力",
+      "以上皆是"
+    ],
+    "ans": "5"
+  },
+  {
+    "id": 247,
+    "type": "MC",
+    "question": "如果出現偏離工作計畫的情况時，施作人員應該？",
+    "options": [
+      "執行作業，並在事後向主管匯報",
+      "繼續處理 作業",
+      "停止作業，諮詢主管並重新評估後再繼續執行作業",
+      "向專案經理投訴"
+    ],
+    "ans": "3"
+  },
+  {
+    "id": 248,
+    "type": "TF",
+    "question": "[BE]當機台發生警報時，但維修工具在無塵室外，為了快速解決機台問題，可透過無塵室外同事透過Mone- in口或逃生門傳遞維修工具。",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 249,
+    "type": "TF",
+    "question": "[BE]著無塵服人員因搬運需求，可將物件或機具協助搬至非無塵室等級之緩衝區後再立刻回到無塵室",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 250,
+    "type": "TF",
+    "question": "[BE]著無塵服人員因搬運需求，可直接從非無塵室等級之緩衝區搬運大型物件至無塵室",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 251,
+    "type": "TF",
+    "question": "[BE]著無塵服人員因搬運需求，可以踏入非無塵區等級之緩衝區,直接回去無塵室工作",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "X"
+  },
+  {
+    "id": 252,
+    "type": "TF",
+    "question": "[BE]承攬商若欲開啟Move-in口需聯繫美光有權限之人員陪同",
+    "options": [
+      "O",
+      "X"
+    ],
+    "ans": "O"
+  },
+  {
+    "id": 253,
+    "type": "MC",
+    "question": "[BE]為了方便工作，可直接透過Move-in口傳遞小型物件(長度<100cm) x 欄1 欄1 欄1 欄1 欄1 欄1 欄1 欄",
+    "options": [],
+    "ans": "1"
+  }
+];
+    </script>
+
+    <!-- CORE SYSTEM JS LOGIC -->
+    <script>
+        // State variables
+        let currentFilter = 'all'; // 'all', 'wrong', 'starred'
+        let currentIdx = 0; // Question index in the currently active filtered list
+        let activeList = [...questionsData]; // List of questions currently in practice
+        
+        // Progress persistence
+        let userProgress = {
+            wrongAnswers: {}, // id -> selected incorrect option
+            starredQuestions: [], // list of starred question IDs
+            lastViewedId: 1, // last viewed question ID
+            practiceHistory: {} // id -> true/false if answered
+        };
+
+        // Exam State variables
+        let examQuestions = [];
+        let examIdx = 0;
+        let examUserAnswers = {}; // index -> chosen option index/value
+        let examTimerInterval = null;
+        let examSecondsRemaining = 45 * 60;
+
+        // Load progress from localStorage on startup
+        function loadProgress() {
+            const saved = localStorage.getItem('micron_practice_progress_2026');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.wrongAnswers) userProgress.wrongAnswers = parsed.wrongAnswers;
+                    if (parsed.starredQuestions) userProgress.starredQuestions = parsed.starredQuestions;
+                    if (parsed.lastViewedId) userProgress.lastViewedId = parsed.lastViewedId;
+                    if (parsed.practiceHistory) userProgress.practiceHistory = parsed.practiceHistory;
+                } catch (e) {
+                    console.error("Error loading progress", e);
+                }
+            }
+            updateStats();
+        }
+
+        // Save progress to localStorage
+        function saveProgress() {
+            localStorage.setItem('micron_practice_progress_2026', JSON.stringify(userProgress));
+            updateStats();
+        }
+
+        // Update stats dashboard
+        function updateStats() {
+            const wrongCount = Object.keys(userProgress.wrongAnswers).length;
+            const starredCount = userProgress.starredQuestions.length;
+            const answeredCount = Object.keys(userProgress.practiceHistory).length;
+            
+            document.getElementById('stat-progress-val').innerHTML = `${answeredCount} <small>/ 253</small>`;
+            document.getElementById('stat-wrong-val').textContent = wrongCount;
+            document.getElementById('stat-starred-val').textContent = starredCount;
+            
+            document.getElementById('filter-wrong-count').textContent = wrongCount;
+            document.getElementById('filter-starred-count').textContent = starredCount;
+        }
+
+        // Reset progress confirmation
+        function resetProgress() {
+            if (confirm("您確定要重置所有的練習進度、錯題本與收藏夾嗎？此動作不可逆。")) {
+                userProgress = {
+                    wrongAnswers: {},
+                    starredQuestions: [],
+                    lastViewedId: 1,
+                    practiceHistory: {}
+                };
+                saveProgress();
+                setFilter('all');
+                currentIdx = 0;
+                renderQuestion();
+            }
+        }
+
+        // Switch Main Tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tabName === 'practice') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('practice-tab').classList.add('active');
+                renderQuestion();
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('exam-tab').classList.add('active');
+                if (examQuestions.length > 0) {
+                    document.getElementById('exam-setup-card').style.display = 'none';
+                    document.getElementById('exam-progress-card').style.display = 'flex';
+                    document.getElementById('exam-result-card').style.display = 'none';
+                } else {
+                    restartExamSetup();
+                }
+            }
+        }
+
+        // Star / Unstar question
+        function toggleStar() {
+            const q = activeList[currentIdx];
+            if (!q) return;
+            
+            const starredIdx = userProgress.starredQuestions.indexOf(q.id);
+            const btn = document.getElementById('star-btn');
+            
+            if (starredIdx > -1) {
+                userProgress.starredQuestions.splice(starredIdx, 1);
+                btn.classList.remove('active');
+            } else {
+                userProgress.starredQuestions.push(q.id);
+                btn.classList.add('active');
+            }
+            saveProgress();
+        }
+
+        // Set list filter
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            
+            if (filterType === 'all') {
+                document.getElementById('filter-all').classList.add('active');
+                activeList = [...questionsData];
+            } else if (filterType === 'wrong') {
+                document.getElementById('filter-wrong').classList.add('active');
+                const wrongIds = Object.keys(userProgress.wrongAnswers).map(Number);
+                activeList = questionsData.filter(q => wrongIds.includes(q.id));
+            } else if (filterType === 'starred') {
+                document.getElementById('filter-starred').classList.add('active');
+                activeList = questionsData.filter(q => userProgress.starredQuestions.includes(q.id));
+            }
+            
+            currentIdx = 0;
+            if (filterType === 'all') {
+                const savedIdx = activeList.findIndex(q => q.id === userProgress.lastViewedId);
+                if (savedIdx > -1) currentIdx = savedIdx;
+            }
+            
+            renderQuestion();
+            generateJumpOptions();
+        }
+
+        // Trigger filters from stat cards clicks
+        function activateFilter(filterType) {
+            setFilter(filterType);
+        }
+
+        // Generate drop down jump options based on activeList
+        function generateJumpOptions() {
+            const select = document.getElementById('jump-select');
+            select.innerHTML = '';
+            
+            if (activeList.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "無符合之題目";
+                select.appendChild(opt);
+                return;
+            }
+            
+            activeList.forEach((q, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.text = `第 ${q.id} 題 - ${q.question.substring(0, 20)}...`;
+                if (idx === currentIdx) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // Jump directly
+        function jumpToQuestion(idx) {
+            currentIdx = parseInt(idx);
+            renderQuestion();
+        }
+
+        // Render current question in Practice Mode
+        function renderQuestion() {
+            const card = document.getElementById('question-card');
+            
+            if (activeList.length === 0) {
+                card.style.display = 'none';
+                document.getElementById('jump-panel').style.display = 'none';
+                
+                let emptyHTML = '';
+                if (currentFilter === 'wrong') {
+                    emptyHTML = `<div class="empty-state">
+                        <span class="empty-icon">🎉</span>
+                        <h3>錯題本是空的！</h3>
+                        <p>太棒了！您目前沒有答錯的題目。請繼續保持！</p>
+                        <button class="btn btn-primary" onclick="setFilter('all')">開始練習全部考題</button>
+                    </div>`;
+                } else {
+                    emptyHTML = `<div class="empty-state">
+                        <span class="empty-icon">⭐</span>
+                        <h3>最愛收藏是空的！</h3>
+                        <p>在答題練習時，可以點選右上角的星星按鈕，即可將難記的考題收藏至此處複習。</p>
+                        <button class="btn btn-primary" onclick="setFilter('all')">開始練習全部考題</button>
+                    </div>`;
+                }
+                
+                const existing = document.getElementById('temp-empty');
+                if (existing) existing.remove();
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.id = 'temp-empty';
+                tempDiv.innerHTML = emptyHTML;
+                card.parentNode.insertBefore(tempDiv, card.nextSibling);
+                return;
+            }
+            
+            card.style.display = 'flex';
+            document.getElementById('jump-panel').style.display = 'flex';
+            const existing = document.getElementById('temp-empty');
+            if (existing) existing.remove();
+            
+            const q = activeList[currentIdx];
+            
+            if (currentFilter === 'all') {
+                userProgress.lastViewedId = q.id;
+                saveProgress();
+            }
+
+            const typeBadge = document.getElementById('q-type-badge');
+            if (q.type === 'TF') {
+                typeBadge.textContent = "是非題";
+                typeBadge.className = "q-badge tf";
+            } else {
+                typeBadge.textContent = "選擇題";
+                typeBadge.className = "q-badge mc";
+            }
+            
+            document.getElementById('q-num-label').textContent = `第 ${q.id} 題 (進度: ${currentIdx + 1} / ${activeList.length})`;
+            
+            const starBtn = document.getElementById('star-btn');
+            if (userProgress.starredQuestions.includes(q.id)) {
+                starBtn.classList.add('active');
+            } else {
+                starBtn.classList.remove('active');
+            }
+            
+            document.getElementById('q-text').textContent = q.question;
+            
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.style.display = 'none';
+            feedbackBox.className = 'feedback-box';
+            
+            const list = document.getElementById('options-list');
+            list.innerHTML = '';
+            
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                
+                const idxSpan = document.createElement('span');
+                idxSpan.className = 'option-idx';
+                
+                let displayVal = index + 1;
+                if (q.type === 'TF') {
+                    displayVal = optText;
+                }
+                
+                idxSpan.textContent = displayVal;
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = optText;
+                
+                btn.appendChild(idxSpan);
+                if (q.type === 'MC') {
+                    btn.appendChild(textSpan);
+                }
+                
+                btn.onclick = () => handleAnswerSelect(btn, displayVal, q);
+                list.appendChild(btn);
+            });
+            
+            const progBar = document.getElementById('progress-bar');
+            const percent = ((currentIdx + 1) / activeList.length) * 100;
+            progBar.style.width = `${percent}%`;
+            
+            document.getElementById('prev-btn').disabled = (currentIdx === 0);
+            
+            const jumpSelect = document.getElementById('jump-select');
+            if (jumpSelect && jumpSelect.options.length > currentIdx) {
+                jumpSelect.selectedIndex = currentIdx;
+            }
+        }
+
+        // Handle Answer selection in Practice mode
+        function handleAnswerSelect(clickedBtn, chosenVal, question) {
+            const list = document.getElementById('options-list');
+            const btns = list.querySelectorAll('.option-btn');
+            
+            if (btns[0].classList.contains('disabled')) return;
+            
+            const isCorrect = (String(chosenVal).toUpperCase() === String(question.ans).toUpperCase());
+            userProgress.practiceHistory[question.id] = isCorrect;
+            
+            btns.forEach((btn, idx) => {
+                btn.classList.add('disabled');
+                
+                let optVal = idx + 1;
+                if (question.type === 'TF') {
+                    optVal = question.options[idx];
+                }
+                
+                const isBtnCorrect = (String(optVal).toUpperCase() === String(question.ans).toUpperCase());
+                if (isBtnCorrect) {
+                    btn.classList.add('reveal-correct');
+                }
+            });
+            
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackText = document.getElementById('feedback-text');
+            
+            if (isCorrect) {
+                clickedBtn.classList.add('correct');
+                feedbackBox.style.display = 'flex';
+                feedbackBox.className = 'feedback-box correct';
+                feedbackIcon.textContent = '✅';
+                feedbackText.textContent = '答對了！恭喜您答對此題！';
+                
+                if (userProgress.wrongAnswers[question.id]) {
+                    delete userProgress.wrongAnswers[question.id];
+                }
+            } else {
+                clickedBtn.classList.add('incorrect');
+                feedbackBox.style.display = 'flex';
+                feedbackBox.className = 'feedback-box incorrect';
+                feedbackIcon.textContent = '❌';
+                feedbackText.textContent = `答錯了！正確答案是: 【${question.ans}】`;
+                
+                userProgress.wrongAnswers[question.id] = chosenVal;
+            }
+            
+            saveProgress();
+        }
+
+        // Previous and Next Question navigation
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIdx < activeList.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            } else {
+                alert("已到達最後一題！您可以點選「快速跳轉」返回前面的題目，或切換至「隨機模擬考」檢測學習成果。");
+            }
+        }
+
+        // EXAM LOGIC FUNCTIONS
+        function restartExamSetup() {
+            examQuestions = [];
+            examIdx = 0;
+            examUserAnswers = {};
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            
+            document.getElementById('exam-setup-card').style.display = 'flex';
+            document.getElementById('exam-progress-card').style.display = 'none';
+            document.getElementById('exam-result-card').style.display = 'none';
+        }
+
+        function startExam() {
+            const shuffled = [...questionsData].sort(() => 0.5 - Math.random());
+            examQuestions = shuffled.slice(0, 50);
+            
+            examIdx = 0;
+            examUserAnswers = {};
+            examSecondsRemaining = 45 * 60;
+            document.getElementById('exam-timer').textContent = "45:00";
+            
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(updateExamTimer, 1000);
+            
+            document.getElementById('exam-setup-card').style.display = 'none';
+            document.getElementById('exam-progress-card').style.display = 'flex';
+            document.getElementById('exam-result-card').style.display = 'none';
+            
+            renderExamQuestion();
+        }
+
+        function updateExamTimer() {
+            examSecondsRemaining--;
+            if (examSecondsRemaining <= 0) {
+                clearInterval(examTimerInterval);
+                document.getElementById('exam-timer').textContent = "00:00";
+                alert("時間到！系統將自動進行收卷與評分。");
+                submitExam();
+                return;
+            }
+            
+            const mins = Math.floor(examSecondsRemaining / 60);
+            const secs = examSecondsRemaining % 60;
+            document.getElementById('exam-timer').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function renderExamQuestion() {
+            const q = examQuestions[examIdx];
+            const examBadge = document.getElementById('exam-q-type');
+            if (q.type === 'TF') {
+                examBadge.textContent = "是非題";
+                examBadge.className = "q-badge tf";
+            } else {
+                examBadge.textContent = "選擇題";
+                examBadge.className = "q-badge mc";
+            }
+            
+            document.getElementById('exam-q-num').textContent = `考題 ${examIdx + 1} / 50`;
+            document.getElementById('exam-q-text').textContent = q.question;
+            
+            const list = document.getElementById('exam-options-list');
+            list.innerHTML = '';
+            
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                
+                const idxSpan = document.createElement('span');
+                idxSpan.className = 'option-idx';
+                
+                let displayVal = index + 1;
+                if (q.type === 'TF') {
+                    displayVal = optText;
+                }
+                idxSpan.textContent = displayVal;
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = optText;
+                
+                btn.appendChild(idxSpan);
+                if (q.type === 'MC') {
+                    btn.appendChild(textSpan);
+                }
+                
+                if (examUserAnswers[examIdx] === displayVal) {
+                    btn.classList.add('reveal-correct');
+                }
+                
+                btn.onclick = () => {
+                    examUserAnswers[examIdx] = displayVal;
+                    renderExamQuestion();
+                };
+                
+                list.appendChild(btn);
+            });
+            
+            const progBar = document.getElementById('exam-progress-bar');
+            const percent = ((examIdx + 1) / 50) * 100;
+            progBar.style.width = `${percent}%`;
+            
+            document.getElementById('exam-prev-btn').disabled = (examIdx === 0);
+            
+            const nextBtn = document.getElementById('exam-next-btn');
+            if (examIdx === 49) {
+                nextBtn.innerHTML = "🏁 送出考卷";
+                nextBtn.onclick = confirmSubmitExam;
+            } else {
+                nextBtn.innerHTML = "下一題 <span>▶</span>";
+                nextBtn.onclick = nextExamQuestion;
+            }
+        }
+
+        function prevExamQuestion() {
+            if (examIdx > 0) {
+                examIdx--;
+                renderExamQuestion();
+            }
+        }
+
+        function nextExamQuestion() {
+            if (examIdx < 49) {
+                examIdx++;
+                renderExamQuestion();
+            }
+        }
+
+        function confirmSubmitExam() {
+            const unanswered = [];
+            for (let i = 0; i < 50; i++) {
+                if (examUserAnswers[i] === undefined) {
+                    unanswered.push(i + 1);
+                }
+            }
+            
+            if (unanswered.length > 0) {
+                if (!confirm(`您還有 ${unanswered.length} 題未作答（題號: ${unanswered.join(', ')}），確定要提前交卷嗎？`)) {
+                    return;
+                }
+            } else {
+                if (!confirm("您已完成所有題目，確定要交卷評分嗎？")) {
+                    return;
+                }
+            }
+            
+            submitExam();
+        }
+
+        function submitExam() {
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            
+            let correctCount = 0;
+            const wrongItems = [];
+            
+            examQuestions.forEach((q, idx) => {
+                const userAns = examUserAnswers[idx];
+                const isCorrect = (userAns !== undefined && String(userAns).toUpperCase() === String(q.ans).toUpperCase());
+                
+                if (isCorrect) {
+                    correctCount++;
+                } else {
+                    wrongItems.push({
+                        question: q,
+                        userAns: userAns || "未作答",
+                        correctAns: q.ans
+                    });
+                    userProgress.wrongAnswers[q.id] = userAns || "X";
+                }
+            });
+            
+            saveProgress();
+            
+            const score = correctCount * 2;
+            const isPass = (score >= 84);
+            
+            document.getElementById('exam-progress-card').style.display = 'none';
+            document.getElementById('exam-result-card').style.display = 'flex';
+            
+            const scoreCircle = document.getElementById('score-circle');
+            const scoreVal = document.getElementById('score-val');
+            const statusBadge = document.getElementById('result-status');
+            
+            scoreVal.textContent = score;
+            
+            if (isPass) {
+                scoreCircle.className = "score-circle pass";
+                scoreVal.className = "score-num pass";
+                statusBadge.textContent = "🎉 測驗及格";
+                statusBadge.className = "result-badge pass";
+            } else {
+                scoreCircle.className = "score-circle fail";
+                scoreVal.className = "score-num fail";
+                statusBadge.textContent = "❌ 未及格 (需84分)";
+                statusBadge.className = "result-badge fail";
+            }
+            
+            document.getElementById('result-summary-text').innerHTML = `答對 <b>${correctCount}</b> 題，答錯 <b>${50 - correctCount}</b> 題。及格標準為 84 分以上 (答對 42 題)。<br/>錯題已為您自動彙整至「一題一題問」首頁的錯題本中，可隨時加強複習！`;
+            
+            const reviewList = document.getElementById('exam-review-list');
+            reviewList.innerHTML = '';
+            
+            if (wrongItems.length === 0) {
+                reviewList.innerHTML = '<div class="empty-state"><h3>💯 滿分！沒有任何錯題！</h3></div>';
+            } else {
+                wrongItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'review-item';
+                    
+                    const qText = document.createElement('div');
+                    qText.className = 'review-q';
+                    qText.textContent = `[第 ${item.question.id} 題] ${item.question.question}`;
+                    
+                    const ansRow = document.createElement('div');
+                    ansRow.className = 'review-ans-row';
+                    
+                    const uAns = document.createElement('span');
+                    uAns.className = 'review-user-ans';
+                    uAns.innerHTML = `您的答案: <b>${item.userAns}</b>`;
+                    
+                    const cAns = document.createElement('span');
+                    cAns.className = 'review-correct-ans';
+                    cAns.innerHTML = `正確答案: <b>${item.correctAns}</b>`;
+                    
+                    ansRow.appendChild(uAns);
+                    ansRow.appendChild(cAns);
+                    div.appendChild(qText);
+                    
+                    if (item.question.type === 'MC') {
+                        const optsDiv = document.createElement('div');
+                        optsDiv.style.display = 'flex';
+                        optsDiv.style.flexDirection = 'column';
+                        optsDiv.style.gap = '4px';
+                        optsDiv.style.marginTop = '5px';
+                        optsDiv.style.fontSize = '0.9rem';
+                        optsDiv.style.color = 'var(--text-secondary)';
+                        
+                        item.question.options.forEach((optText, idx) => {
+                            const isCorrectOpt = (idx + 1 === parseInt(item.question.ans));
+                            const isUserOpt = (idx + 1 === parseInt(item.userAns));
+                            
+                            const optP = document.createElement('div');
+                            optP.style.padding = '3px 8px';
+                            optP.style.borderRadius = '4px';
+                            
+                            if (isCorrectOpt) {
+                                optP.style.backgroundColor = 'rgba(0,230,118,0.1)';
+                                optP.style.color = 'var(--accent-green)';
+                                optP.textContent = `(得標) (${idx + 1}) ${optText}  ← 正確答案`;
+                            } else if (isUserOpt) {
+                                optP.style.backgroundColor = 'rgba(255,51,68,0.1)';
+                                optP.style.color = 'var(--accent-red)';
+                                optP.textContent = `(點選) (${idx + 1}) ${optText}  ← 您的選擇`;
+                            } else {
+                                optP.textContent = `(${idx + 1}) ${optText}`;
+                            }
+                            optsDiv.appendChild(optP);
+                        });
+                        div.appendChild(optsDiv);
+                    }
+                    
+                    div.appendChild(ansRow);
+                    reviewList.appendChild(div);
+                });
+            }
+            
+            examQuestions = [];
+        }
+
+        // ON LAUNCH INITIALIZATION
+        window.onload = () => {
+            loadProgress();
+            renderQuestion();
+            generateJumpOptions();
+        };
+    </script>
+</body>
+</html>
