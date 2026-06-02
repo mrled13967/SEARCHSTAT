@@ -483,215 +483,27 @@
             color: var(--text-muted) !important;
         }
 
-        /* ===== DYNAMIC EFFECTS & ANIMATIONS ===== */
+        /* ===== STATIC HOVER EFFECTS (animations removed for stability) ===== */
 
-        /* Animated gradient background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(ellipse at 20% 50%, rgba(200, 35, 51, 0.06) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 20%, rgba(200, 35, 51, 0.04) 0%, transparent 50%),
-                        radial-gradient(ellipse at 50% 80%, rgba(100, 20, 30, 0.05) 0%, transparent 50%);
-            animation: bgPulse 8s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body > * { position: relative; z-index: 1; }
-
-        @keyframes bgPulse {
-            0% { opacity: 0.5; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.05); }
-        }
-
-        /* Title shimmer animation */
-        #decoder-page h1.main-title {
-            background-size: 200% auto;
-            animation: titleShimmer 3s linear infinite;
-        }
-
-        @keyframes titleShimmer {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
-
-        /* Page load fade-in */
-        .tab-content.active {
-            animation: fadeSlideIn 0.5s ease-out;
-        }
-
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Quick input section entrance */
-        #decoder-page .quick-input-section {
-            animation: cardReveal 0.6s ease-out;
-        }
-
-        /* Decoder card entrance with stagger */
-        #decoder-page .decoder-section:not(.hidden) {
-            animation: decoderReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes decoderReveal {
-            from { opacity: 0; transform: translateY(24px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes cardReveal {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Rotating border glow on card hover */
-        #decoder-page .decoder-section::before {
-            content: '';
-            position: absolute;
-            top: -1px; left: -1px; right: -1px; bottom: -1px;
-            border-radius: var(--radius);
-            background: conic-gradient(from 0deg, transparent, var(--tsmc-red), transparent, transparent);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            z-index: -1;
-            animation: rotateBorder 4s linear infinite;
-        }
-
-        #decoder-page .decoder-section {
-            position: relative;
-            overflow: visible;
-        }
-
-        #decoder-page .decoder-section:hover::before {
-            opacity: 0.6;
-        }
-
-        @keyframes rotateBorder {
-            from { background: conic-gradient(from 0deg, transparent, var(--tsmc-red), transparent, transparent); }
-            to { background: conic-gradient(from 360deg, transparent, var(--tsmc-red), transparent, transparent); }
-        }
-
-        /* Input focus pulse ring */
-        #decoder-page .input-area input:focus {
-            animation: inputPulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes inputPulse {
-            0%, 100% { box-shadow: 0 0 0 3px var(--tsmc-red-glow), 0 0 12px rgba(200, 35, 51, 0.15); }
-            50% { box-shadow: 0 0 0 5px rgba(200, 35, 51, 0.2), 0 0 20px rgba(200, 35, 51, 0.25); }
-        }
-
-        /* Table row hover effect */
+        /* Table row hover effect - color only, no transform */
         #decoder-page tbody tr {
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color 0.15s ease;
         }
 
         #decoder-page tbody tr:hover {
             background: rgba(200, 35, 51, 0.08) !important;
-            transform: translateX(4px);
-            box-shadow: -4px 0 0 var(--tsmc-red);
         }
 
-        /* Triggered bits flash on appear */
-        #decoder-page .triggered-bits-list p {
-            animation: triggerFlash 0.5s ease-out;
+        /* Input focus ring - static, no animation */
+        #decoder-page .input-area input:focus {
+            box-shadow: 0 0 0 3px var(--tsmc-red-glow), 0 0 12px rgba(200, 35, 51, 0.15);
         }
 
-        @keyframes triggerFlash {
-            0% { opacity: 0; transform: translateX(-12px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
-
-        /* Binary output glow pulse */
-        #decoder-page .binary-output:not(:empty) {
-            animation: binaryGlow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes binaryGlow {
-            from { border-color: rgba(200, 35, 51, 0.15); }
-            to { border-color: rgba(200, 35, 51, 0.4); box-shadow: 0 0 8px rgba(200, 35, 51, 0.15); }
-        }
-
-        /* Tab button click ripple */
-        .tab-nav button {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tab-nav button::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 0; height: 0;
-            border-radius: 50%;
-            background: var(--tsmc-red-glow);
-            transform: translate(-50%, -50%);
-            transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
-            opacity: 0;
-        }
-
-        .tab-nav button:active::after {
-            width: 200px; height: 200px;
-            opacity: 0.3;
-        }
-
-        /* Download button hover glow expand */
-        #decoder-page .download-btn {
-            position: relative;
-            overflow: hidden;
-        }
-
-        #decoder-page .download-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        #decoder-page .download-btn:hover::before {
-            left: 100%;
-        }
-
-        /* Converter nav link hover lift */
+        /* Converter nav link hover */
         #converter-page .nav a {
-            transition: background-color var(--transition), color var(--transition), box-shadow var(--transition), transform 0.2s ease;
+            transition: background-color var(--transition), color var(--transition), box-shadow var(--transition);
         }
 
-        #converter-page .nav a:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Converter input group entrance */
-        #converter-page .input-group {
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        #converter-page .input-group:hover {
-            transform: translateX(6px);
-        }
-
-        /* Collapsible button pulse on hover */
-        #converter-page .collapsible {
-            position: relative;
-            overflow: hidden;
-        }
-
-        #converter-page .collapsible::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        #converter-page .collapsible:hover::before {
-            left: 100%;
-        }
 
         /* Scrollbar styling for dark theme */
         ::-webkit-scrollbar { width: 8px; }
