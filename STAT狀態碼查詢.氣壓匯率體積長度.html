@@ -1240,11 +1240,11 @@
 
         function renderDecoder(config, value, data, bitLength) {
             const hexValue = value.trim().toUpperCase();
-            config.tableBodyEl.innerHTML = '';
-            config.triggeredListEl.innerHTML = '<p>None</p>';
 
             if (hexValue && !/^[0-9A-F]*$/i.test(hexValue)) {
                 config.binaryOutputEl.textContent = 'Invalid Hexadecimal Input';
+                config.tableBodyEl.textContent = '';
+                config.triggeredListEl.innerHTML = '<p>None</p>';
                 config.downloadBtn.classList.add('hidden');
                 return;
             }
@@ -1257,69 +1257,107 @@
 
             const intValue = hexValue ? parseInt(hexValue, 16) : 0;
             const binaryString = intValue.toString(2).padStart(bitLength, '0');
-
             config.binaryOutputEl.textContent = binaryString.replace(/(.{4})/g, '$1 ').trim();
 
-            let hasTriggeredBit = false;
+            // 使用 DocumentFragment 批次建立所有 row，最後一次性插入 DOM
+            // 避免每次 appendChild 都觸發 layout reflow（手機崩潰根因）
+            const tableFragment = document.createDocumentFragment();
+            const triggeredFragment = document.createDocumentFragment();
             let triggeredCount = 0;
 
             data.forEach(item => {
                 const bitIndexInString = (bitLength - 1) - item.bit;
                 if (bitIndexInString < 0 || bitIndexInString >= binaryString.length) return;
 
-                const bitValue = binaryString[bitIndexInString];
-                const isTriggered = bitValue === '1';
-
-                let resultText, resultBadge, rowClass, isConsideredActive;
+                const isTriggered = binaryString[bitIndexInString] === '1';
+                let resultText, resultColor, resultWeight, rowClass, isConsideredActive;
 
                 if (config.type === 'inputg') {
-                    resultBadge = isTriggered
-                        ? '<span style="color:#ff4d5e;font-weight:700">● High</span>'
-                        : '<span style="color:#4ade80;font-weight:600">● Low</span>';
+                    resultText  = isTriggered ? '● High' : '● Low';
+                    resultColor = isTriggered ? '#ff4d5e' : '#4ade80';
+                    resultWeight = isTriggered ? '700' : '600';
                     rowClass = isTriggered ? 'high' : '';
                     isConsideredActive = isTriggered;
                 } else {
                     const isNA = (config.naConditions || []).some(cond => item.description.includes(cond));
                     if (isNA) {
-                        resultBadge = '<span style="color:#6b7280;font-weight:500">— N/A</span>';
+                        resultText = '— N/A'; resultColor = '#6b7280'; resultWeight = '500';
                     } else if (isTriggered) {
-                        resultBadge = '<span style="color:#ff4d5e;font-weight:700;text-shadow:0 0 6px rgba(255,77,94,0.4)">▲ True</span>';
+                        resultText = '▲ True'; resultColor = '#ff4d5e'; resultWeight = '700';
                     } else {
-                        resultBadge = '<span style="color:#4ade80;font-weight:600">● False</span>';
+                        resultText = '● False'; resultColor = '#4ade80'; resultWeight = '600';
                     }
                     rowClass = (isTriggered && !isNA) ? 'true' : '';
                     isConsideredActive = (isTriggered && !isNA);
                 }
 
+                // 建立 table row（使用 textContent 避免 innerHTML 解析）
                 const row = document.createElement('tr');
                 if (rowClass) row.classList.add(rowClass);
 
+                const tdBit = document.createElement('td');
+                tdBit.className = 'bit-col';
+                tdBit.textContent = item.bit;
+
+                const tdDesc = document.createElement('td');
+                tdDesc.className = 'desc-col';
+                tdDesc.textContent = item.description;
+                const descSpan = document.createElement('span');
+                descSpan.className = 'chinese-desc';
+                descSpan.textContent = item.chinese;
+                tdDesc.appendChild(descSpan);
+
+                const tdResult = document.createElement('td');
+                tdResult.className = 'result-col';
+                const badge = document.createElement('span');
+                badge.style.cssText = `color:${resultColor};font-weight:${resultWeight}`;
+                badge.textContent = resultText;
+                tdResult.appendChild(badge);
+
+                row.appendChild(tdBit);
+                row.appendChild(tdDesc);
+                row.appendChild(tdResult);
+                tableFragment.appendChild(row);
+
+                // 建立 triggered 項目
                 if (isConsideredActive) {
                     triggeredCount++;
-                    if (!hasTriggeredBit) {
-                        config.triggeredListEl.innerHTML = '';
-                        hasTriggeredBit = true;
-                    }
                     const p = document.createElement('p');
-                    p.innerHTML = `<b>Bit ${item.bit}:</b> ${item.description} <span class="chinese-desc">(${item.chinese})</span>`;
-                    config.triggeredListEl.appendChild(p);
+                    const b = document.createElement('b');
+                    b.textContent = `Bit ${item.bit}: `;
+                    const descText = document.createTextNode(item.description + ' ');
+                    const chSpan = document.createElement('span');
+                    chSpan.className = 'chinese-desc';
+                    chSpan.textContent = `(${item.chinese})`;
+                    p.appendChild(b);
+                    p.appendChild(descText);
+                    p.appendChild(chSpan);
+                    triggeredFragment.appendChild(p);
                 }
-
-                row.innerHTML = `
-                    <td class="bit-col">${item.bit}</td>
-                    <td class="desc-col">${item.description}<span class="chinese-desc">${item.chinese}</span></td>
-                    <td class="result-col">${resultBadge}</td>
-                `;
-                config.tableBodyEl.appendChild(row);
             });
 
-            // Update triggered header with count badge
+            // 一次性插入，只觸發一次 reflow
+            config.tableBodyEl.textContent = '';
+            config.tableBodyEl.appendChild(tableFragment);
+
+            config.triggeredListEl.textContent = '';
+            if (triggeredCount > 0) {
+                config.triggeredListEl.appendChild(triggeredFragment);
+            } else {
+                const p = document.createElement('p');
+                p.textContent = 'None';
+                config.triggeredListEl.appendChild(p);
+            }
+
+            // 更新 triggered header 計數
             const h3 = config.triggeredListEl.closest('.triggered-bits-container').querySelector('h3');
             const baseName = config.type === 'inputg' ? 'Active Signals (High)' : 'Triggered Bits';
+            h3.textContent = baseName;
             if (triggeredCount > 0) {
-                h3.innerHTML = `${baseName} <span style="background:var(--status-true);color:#fff;padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:8px;">${triggeredCount}</span>`;
-            } else {
-                h3.textContent = baseName;
+                const badge = document.createElement('span');
+                badge.style.cssText = 'background:var(--status-true);color:#fff;padding:2px 10px;border-radius:12px;font-size:0.8em;margin-left:8px;';
+                badge.textContent = triggeredCount;
+                h3.appendChild(badge);
             }
         }
 
@@ -1442,10 +1480,11 @@
                     isUpdating = false;
 
                     // Debounce DOM 重建（手機上避免每個字都暴力重繪 table）
+                    // 300ms：讓使用者打完一個字元後才渲染，手機上避免崩潰
                     clearTimeout(debounceTimer);
                     debounceTimer = setTimeout(() => {
                         updateDecoder(config, value);
-                    }, 80);
+                    }, 300);
                 };
 
                 config.quickInputEl.addEventListener('input', handleInput);
